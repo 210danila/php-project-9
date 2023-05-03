@@ -13,42 +13,18 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use DI\Container;
-use App\Connection;
-use App\DBController;
+use function App\Functions\getController;
+use function App\Functions\validateUrl;
+use function App\Functions\normalizeUrl;
 
-function getController()
-{
-    $pdo = Connection::get()->connect();
-    return new DBController($pdo);
-}
-
-function validateUrl(string $url)
-{
-    if (empty($url)) {
-        return ['URL не должен быть пустым'];
-    }
-    if ($url === 'https://' || $url === 'http://') {
-        return ['Некорректный URL'];
-    }
-
-    $validator = new Valitron\Validator(['name' => $url]);
-    $validator->rule('required', 'name')
-    ->rule('lengthMax', 'name', 255)
-    ->rule('url', 'name')
-    ->message('Некорректный URL');
-
-    return $validator->validate() ? [] : ['Некорректный URL'];
-}
-
-function normalizeUrl($urlName)
-{
-    $parsedUrl = parse_url($urlName);
-    return $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
-}
+session_start();
 
 $container = new Container();
 $container->set('renderer', function () {
     return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
+});
+$container->set('flash', function () {
+    return new \Slim\Flash\Messages();
 });
 
 $app = AppFactory::createFromContainer($container);
@@ -77,30 +53,32 @@ $app->get('/urls/{id}', function (Request $request, Response $response, array $a
     $controller = getController();
     $id = $args['id'];
     $url = $controller->selectUrl('id', $id);
+    $flashMessages = $this->get('flash')->getMessages();
 
-    $params = ['url' => $url];
+    $params = ['url' => $url, 'flash' => $flashMessages];
     return $this->get('renderer')->render($response, "url.html", $params);
 })->setName('url');
 
 $app->post('/urls', function (Request $request, Response $response) use ($router) {
     $urlName = $request->getParsedBodyParam('url')['name'];
-    $errors = validateUrl($urlName);
+    $normalizedUrlName = normalizeUrl($urlName);
+    $errors = validateUrl($normalizedUrlName);
 
     if (empty($errors)) {
         $controller = getController();
-        flash('yo');
         try {
-            print_r('fa');
-            $controller->insertUrl($urlName);
+            $controller->insertUrl($normalizedUrlName);
+            $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
         } catch (\Exception $e) {
+            $this->get('flash')->addMessage('success', 'Страница уже существует');
         }
-        $id = $controller->selectUrl('name', $urlName)['id'];
+        $id = $controller->selectUrl('name', $normalizedUrlName)['id'];
         return $response->withRedirect($router->urlFor('url', ['id' => $id]), 302);
     }
 
     $params = [
         'errors' => $errors,
-        'urlName' => $urlName
+        'urlName' => $normalizedUrlName
     ];
     return $this->get('renderer')->render($response, "index.html", $params);
 });

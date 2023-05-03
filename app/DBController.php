@@ -23,11 +23,6 @@ class DBController
 
     public function createTables()
     {
-        // $sql = 'CREATE TABLE IF NOT EXISTS urls (
-        //            id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-        //            name varchar(255) NOT NULL UNIQUE,
-        //            created_at timestamp
-        // );';
         $dbMigrations = explode("\n\n", file_get_contents('../app/database.sql'));
 
         foreach ($dbMigrations as $sql) {
