@@ -33,6 +33,7 @@ $app->addErrorMiddleware(true, true, true);
 $router = $app->getRouteCollector()->getRouteParser();
 
 $app->get('/', function (Request $request, Response $response) {
+    dump(getenv('PGPASSWORD'), getenv('PGUSER'), getenv('DATABASE_URL'));
     $params = [
         'errors' => [],
         'urlName' => ''
