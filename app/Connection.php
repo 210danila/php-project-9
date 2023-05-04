@@ -23,6 +23,8 @@ final class Connection
         }
 
         $databaseName = ltrim($databaseUrl['path'], '/');
+        $databasePassword = getenv('PGPASSWORD');
+        $databaseUser = getenv('PGUSER');
         $conStr = sprintf(
             "pgsql:host=%s;port=%d;dbname={$databaseName};user=%s;password=%s",
             $databaseUrl['host'],
