@@ -29,8 +29,8 @@ final class Connection
             "pgsql:host=%s;port=%d;dbname={$databaseName};user=%s;password=%s",
             $databaseUrl['host'],
             $databaseUrl['port'],
-            $databaseUrl['user'],
-            $databaseUrl['password']
+            $databaseUser,
+            $databasePassword
         );
 
         $pdo = new \PDO($conStr);
