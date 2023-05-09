@@ -33,7 +33,6 @@ $app->addErrorMiddleware(true, true, true);
 $router = $app->getRouteCollector()->getRouteParser();
 
 $app->get('/', function (Request $request, Response $response) {
-    dump(getenv('PGPASSWORD'), getenv('PGUSER'), getenv('DATABASE_URL'));
     $params = [
         'errors' => [],
         'urlName' => ''
@@ -43,45 +42,65 @@ $app->get('/', function (Request $request, Response $response) {
 
 $app->get('/urls', function (Request $request, Response $response) {
     $controller = getController();
-    $urls = $controller->selectUrls();
-    $sortedUrls = collect($urls)->sortByDesc('id');
-
-    $params = ['urls' => $sortedUrls];
+    $urls = $controller->makeQuery('select', 'urls')
+        ->orderBy('id', 'DESC')
+        ->exec();
+    $params = ['urls' => $urls];
     return $this->get('renderer')->render($response, "urls.html", $params);
 })->setName('urls');
 
 $app->get('/urls/{id}', function (Request $request, Response $response, array $args) {
     $controller = getController();
-    $id = $args['id'];
-    $url = $controller->selectUrl('id', $id);
-    $flashMessages = $this->get('flash')->getMessages();
+    $id = (int) $args['id'];
+    $url = $controller->makeQuery('select', 'urls')->where('id', $id)->exec(true);
+    $urlChecks = $controller->makeQuery('select', 'url_checks')
+        ->where('url_id', $id)
+        ->orderBy('id', 'DESC')
+        ->exec();
 
-    $params = ['url' => $url, 'flash' => $flashMessages];
+    $flashMessages = $this->get('flash')->getMessages();
+    $params = ['url' => $url, 'flash' => $flashMessages, 'urlChecks' => $urlChecks];
     return $this->get('renderer')->render($response, "url.html", $params);
 })->setName('url');
 
 $app->post('/urls', function (Request $request, Response $response) use ($router) {
     $urlName = $request->getParsedBodyParam('url')['name'];
-    $normalizedUrlName = normalizeUrl($urlName);
-    $errors = validateUrl($normalizedUrlName);
+    $errors = validateUrl($urlName);
 
     if (empty($errors)) {
+        $normalizedUrlName = normalizeUrl($urlName);
         $controller = getController();
-        try {
-            $controller->insertUrl($normalizedUrlName);
-            $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
-        } catch (\Exception $e) {
+
+        $isNameInDB = $controller->makeQuery('select', 'urls')
+            ->where('name', $normalizedUrlName)
+            ->exec(true);
+        if ($isNameInDB) {
             $this->get('flash')->addMessage('success', 'Страница уже существует');
+        } else {
+            $urlId = $controller->makeQuery('insert', 'urls')
+                ->values(['name' => $normalizedUrlName])
+                ->exec();
+            $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
         }
-        $id = $controller->selectUrl('name', $normalizedUrlName)['id'];
-        return $response->withRedirect($router->urlFor('url', ['id' => $id]), 302);
+
+        return $response->withRedirect($router->urlFor('url', ['id' => $urlId]), 302);
     }
 
     $params = [
         'errors' => $errors,
-        'urlName' => $normalizedUrlName
+        'urlName' => $urlName
     ];
     return $this->get('renderer')->render($response, "index.html", $params);
+});
+
+$app->post('/urls/{id}/checks', function (Request $request, Response $response, array $args) use ($router) {
+    $controller = getController();
+    $url_id = (int) $args['id'];
+
+    $controller->makeQuery('insert', 'url_checks')
+        ->values(['url_id' => $url_id])
+        ->exec();
+    return $response->withRedirect($router->urlFor('url', ['id' => $url_id]), 302);
 });
 
 $app->run();
