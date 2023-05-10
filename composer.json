@@ -21,7 +21,8 @@
         "tightenco/collect": "^9.52",
         "nesbot/carbon": "^2.66",
         "illuminate/support": "^10.9",
-        "slim/flash": "^0.4.0"
+        "slim/flash": "^0.4.0",
+        "guzzlehttp/guzzle": "^7.5"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "*",

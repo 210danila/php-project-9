@@ -40,16 +40,19 @@
 								<th>Последняя проверка</th>
 								<th>Код ответа</th>
 							</tr>
-							<?php foreach ($urls as $url) : ?>
+							<?php foreach ($urlsData as $url) : ?>
 								<tr>
-									<td><?= $url['id'] ?></td>
-									<td>
-										<a href="/urls/<?= $url['id'] ?>"><?= $url['name'] ?></a>
-									</td>
-									<td></td>
-									<td></td>
+									<td><?= $url['name'] ?></td>
+									<td><a href="/urls/<?= $url['id'] ?>"><?= $url['name'] ?></a></td>
+									<?php if (!empty($url['check'])) : ?>
+										<td><?= $url['check']['created_at'] ?></td>
+										<td><?= $url['check']['status_code'] ?></td>
+									<?php else: ?>
+										<td></td>
+										<td></td>
+									<?php endif; ?>
 								</tr>
-							<?php endforeach ?>
+							<?php endforeach; ?>
 						</tbody>
 					</table>
 				</div>
