@@ -17,7 +17,7 @@ final class Connection
      */
     public function connect()
     {
-        $databaseUrl = parse_url(getenv('DATABASE_URL'));
+        $databaseUrl = parse_url($_ENV('DATABASE_URL'));
         if ($databaseUrl === false) {
             throw new \Exception("Error reading database configuration file");
         }
@@ -26,9 +26,10 @@ final class Connection
         // $databasePassword = getenv('PGPASSWORD');
         // $databaseUser = getenv('PGUSER');
         $conStr = sprintf(
-            "pgsql:host=%s;port=%d;dbname={$databaseName};user=%s;password=%s",
+            "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
             $databaseUrl['host'],
             $databaseUrl['port'],
+            $databaseName,
             $databaseUrl['user'],
             $databaseUrl['password']
         );
