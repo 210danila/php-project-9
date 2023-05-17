@@ -76,7 +76,7 @@ $app->get('/urls/{id}', function (Request $request, Response $response, array $a
     return $this->get('renderer')->render($response, "url.html", $params);
 })->setName('url');
 
-$app->post('/urls', function (Request $request, Response $response) use ($router) {
+$app->post('/', function (Request $request, Response $response) use ($router) {
     $urlName = $request->getParsedBodyParam('url')['name'];
     $normalizedUrlName = normalizeUrl($urlName);
     $errors = validateUrl($normalizedUrlName);
