@@ -57,14 +57,14 @@ class DBController
         return $clauses[$clauseName];
     }
 
-    public function makeQuery(string $query, string $tableName)
+    public function makeQuery(string $queryType, string $tableName)
     {
-        if (array_search($query, self::AVAILABLE_QUERIES) === false) {
-            throw new \Exception("No such handler for {$query}.");
+        if (array_search($queryType, self::AVAILABLE_QUERIES) === false) {
+            throw new \Exception("No such handler for {$queryType}.");
         }
         $this->setQueryData([
-            'type' => $query,
-            'sql' => $query === 'select' ? "SELECT * FROM {$tableName}" : "INSERT INTO {$tableName}",
+            'type' => $queryType,
+            'sql' => $queryType === 'select' ? "SELECT * FROM {$tableName}" : "INSERT INTO {$tableName}",
             'clauses' => [],
             'insertData' => []
         ]);

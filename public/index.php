@@ -12,11 +12,8 @@ if (file_exists($autoloadPath1)) {
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
-use GuzzleHttp\Client;
 use DI\Container;
-use function App\Functions\getController;
-use function App\Functions\validateUrl;
-use function App\Functions\normalizeUrl;
+use function App\Functions\{getController, validateUrl, normalizeUrl, generateUrlCheck};
 
 session_start();
 
@@ -29,7 +26,6 @@ $container->set('flash', function () {
 });
 
 $app = AppFactory::createFromContainer($container);
-
 $app->addErrorMiddleware(true, true, true);
 
 $router = $app->getRouteCollector()->getRouteParser();
@@ -62,6 +58,7 @@ $app->get('/urls', function (Request $request, Response $response) {
 $app->get('/urls/{id}', function (Request $request, Response $response, array $args) {
     $controller = getController();
     $urlId = (int) $args['id'];
+
     $url = $controller->makeQuery('select', 'urls')
         ->where('id', $urlId)
         ->exec(true);
@@ -69,8 +66,8 @@ $app->get('/urls/{id}', function (Request $request, Response $response, array $a
         ->where('url_id', $urlId)
         ->orderBy('id', 'DESC')
         ->exec();
-
     $flashMessages = $this->get('flash')->getMessages();
+
     $params = [
         'url' => $url,
         'urlChecks' => $urlChecks,
@@ -81,21 +78,18 @@ $app->get('/urls/{id}', function (Request $request, Response $response, array $a
 
 $app->post('/urls', function (Request $request, Response $response) use ($router) {
     $urlName = $request->getParsedBodyParam('url')['name'];
-    $errors = validateUrl($urlName);
+    $normalizedUrlName = normalizeUrl($urlName);
+    $errors = validateUrl($normalizedUrlName);
     $controller = getController();
 
     if (empty($errors)) {
-        $normalizedUrlName = normalizeUrl($urlName);
-
-        $lineWithSuchName = $controller->makeQuery('select', 'urls')
+        $sameUrl = $controller->makeQuery('select', 'urls')
             ->where('name', $normalizedUrlName)
             ->exec(true);
 
-        if (!empty($lineWithSuchName)) {
+        if (!empty($sameUrl)) {
             $this->get('flash')->addMessage('success', 'Страница уже существует');
-            $urlId = $controller->makeQuery('select', 'urls')
-                ->where('name', $lineWithSuchName['name'])
-                ->exec(true);
+            $urlId = $sameUrl['id'];
         } else {
             $urlId = $controller->makeQuery('insert', 'urls')
                 ->values(['name' => $normalizedUrlName])
@@ -117,17 +111,17 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
 $app->post('/urls/{id}/checks', function (Request $request, Response $response, array $args) use ($router) {
     $controller = getController();
     $urlId = (int) $args['id'];
-
-    $urlName = $controller->makeQuery('select', 'urls')
+    $url = $controller->makeQuery('select', 'urls')
         ->where('id', $urlId)
-        ->exec(true)['name'];
+        ->exec(true);
+
     try {
-        $client = new Client();
-        $res = $client->request('GET', $urlName);
-        $statusCode = $res->getStatusCode();
+        $values = generateUrlCheck($url);
         $controller->makeQuery('insert', 'url_checks')
-            ->values(['url_id' => $urlId, 'status_code' => $statusCode])
+            ->values($values)
             ->exec();
+        $flashMessage = 'Страница успешно проверена';
+        $this->get('flash')->addMessage('success', $flashMessage);
     } catch (\Exception $e) {
         $flashMessage = 'Произошла ошибка при проверке,
         не удалось подключиться';

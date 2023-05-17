@@ -22,7 +22,8 @@
         "nesbot/carbon": "^2.66",
         "illuminate/support": "^10.9",
         "slim/flash": "^0.4.0",
-        "guzzlehttp/guzzle": "^7.5"
+        "guzzlehttp/guzzle": "^7.5",
+        "imangazaliev/didom": "^1.13"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "*",
