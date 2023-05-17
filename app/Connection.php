@@ -17,7 +17,7 @@ final class Connection
      */
     public function connect()
     {
-        $databaseUrl = parse_url($_ENV('DATABASE_URL'));
+        $databaseUrl = parse_url(getenv('DATABASE_URL'));
         if ($databaseUrl === false) {
             throw new \Exception("Error reading database configuration file");
         }
@@ -31,7 +31,7 @@ final class Connection
             $databaseUrl['port'],
             $databaseName,
             $databaseUrl['user'],
-            $databaseUrl['password']
+            $databaseUrl['pass']
         );
 
         $pdo = new \PDO($conStr);
