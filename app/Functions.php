@@ -44,7 +44,7 @@ function generateUrlCheck($url)
     $urlId = $url['id'];
 
     $document = new Document($url['name'], true);
-    $formatContent = fn ($text) => mb_substr(trim(htmlspecialchars($text)), 0, 200);
+    $formatContent = fn ($text) => mb_substr(trim($text), 0, 200);
     $h1 = $document->first('h1::text()');
     $title = $document->first('title::text()');
     $description = $document->first('meta[name=description][content]::attr(content)');
