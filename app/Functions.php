@@ -52,8 +52,8 @@ function generateUrlCheck($url)
     return [
         'url_id' => $urlId,
         'status_code' => $statusCode,
-        'h1'=> optional($h1, $formatContent),
-        'title' => optional($title,$formatContent),
+        'h1' => optional($h1, $formatContent),
+        'title' => optional($title, $formatContent),
         'description' => optional($description, $formatContent)
     ];
 }
