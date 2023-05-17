@@ -23,14 +23,14 @@ final class Connection
         }
 
         $databaseName = ltrim($databaseUrl['path'], '/');
-        $databasePassword = getenv('PGPASSWORD');
-        $databaseUser = getenv('PGUSER');
+        // $databasePassword = getenv('PGPASSWORD');
+        // $databaseUser = getenv('PGUSER');
         $conStr = sprintf(
             "pgsql:host=%s;port=%d;dbname={$databaseName};user=%s;password=%s",
             $databaseUrl['host'],
             $databaseUrl['port'],
-            $databaseUser,
-            $databasePassword
+            $databaseUrl['user'],
+            $databaseUrl['password']
         );
 
         $pdo = new \PDO($conStr);
