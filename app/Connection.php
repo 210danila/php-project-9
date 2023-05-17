@@ -36,7 +36,7 @@ final class Connection
         $pdo = new \PDO($conStr);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $dbMigrations = explode("\n\n", file_get_contents('../app/database.sql'));
+        $dbMigrations = explode("\n\n", file_get_contents('../database.sql'));
         foreach ($dbMigrations as $sql) {
             $pdo->exec($sql);
         }
