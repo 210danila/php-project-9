@@ -39,7 +39,7 @@ function normalizeUrl(string $urlName)
     return $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
 }
 
-function generateUrlCheck(string $url)
+function generateUrlCheck(array $url)
 {
     $client = new Client();
     $res = $client->request('GET', $url['name']);

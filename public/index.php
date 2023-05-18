@@ -77,7 +77,7 @@ $app->get('/urls/{id}', function (Request $request, Response $response, array $a
 })->setName('url');
 
 $app->post('/urls', function (Request $request, Response $response) use ($router) {
-    $urlName = $request->getParsedBodyParam('url')['name'];
+    $urlName = $request->getParsedBody()['url']['name'];
     $normalizedUrlName = normalizeUrl($urlName);
     $errors = validateUrl($normalizedUrlName);
     $controller = getController();
@@ -97,7 +97,7 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
             $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
         }
 
-        $redirectRoute = $router->urlFor('url', ['id' => $urlId]);
+        $redirectRoute = $router->urlFor('url', ['id' => (string) $urlId]);
         return $response->withRedirect($redirectRoute, 302);
     }
 
@@ -127,7 +127,8 @@ $app->post('/urls/{id}/checks', function (Request $request, Response $response, 
         не удалось подключиться';
         $this->get('flash')->addMessage('error', $flashMessage);
     }
-    return $response->withRedirect($router->urlFor('url', ['id' => $urlId]), 302);
+    $redirectRoute = $router->urlFor('url', ['id' => (string) $urlId]);
+    return $response->withRedirect($redirectRoute, 302);
 });
 
 $app->run();
