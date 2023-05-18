@@ -29,10 +29,13 @@ function validateUrl(string $url)
 
 function normalizeUrl($urlName)
 {
+    $parsedUrl = parse_url($urlName);
     if (empty($urlName)) {
         return '';
     }
-    $parsedUrl = parse_url($urlName);
+    if ($parsedUrl === false) {
+        return $urlName;
+    }
     return $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
 }
 

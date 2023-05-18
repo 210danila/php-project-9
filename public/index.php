@@ -98,6 +98,7 @@ $app->post('/', function (Request $request, Response $response) use ($router) {
         }
 
         $redirectRoute = $router->urlFor('url', ['id' => $urlId]);
+        dump($redirectRoute);
         return $response->withRedirect($redirectRoute, 302);
     }
 
