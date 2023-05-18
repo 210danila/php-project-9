@@ -27,7 +27,7 @@ function validateUrl(string $url)
     return $validator->validate() ? [] : ['Некорректный URL'];
 }
 
-function normalizeUrl($urlName)
+function normalizeUrl(string $urlName)
 {
     $parsedUrl = parse_url($urlName);
     if (empty($urlName)) {
@@ -39,7 +39,7 @@ function normalizeUrl($urlName)
     return $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
 }
 
-function generateUrlCheck($url)
+function generateUrlCheck(string $url)
 {
     $client = new Client();
     $res = $client->request('GET', $url['name']);

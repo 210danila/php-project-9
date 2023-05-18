@@ -8,23 +8,12 @@ class DBController
 {
     public const AVAILABLE_QUERIES = ['insert', 'select'];
 
-    private $pdo;
-    private $queryData;
+    private \PDO $pdo;
+    private array $queryData;
 
-    public function __construct($pdo)
+    public function __construct(\PDO $pdo)
     {
         $this->pdo = $pdo;
-    }
-
-    public function createTables()
-    {
-        $migrationFileContents = file_get_contents('../app/database.sql');
-        $migrations = explode("\n\n", $migrationFileContents);
-
-        foreach ($migrations as $migration) {
-            $this->pdo->exec($migration);
-        }
-        return $this;
     }
 
     public function setQueryData(array $data)
@@ -32,7 +21,7 @@ class DBController
         $this->queryData = $data;
     }
 
-    public function setQueryParam($name, $value)
+    public function setQueryParam(string $name, string|array $value)
     {
         $this->queryData[$name] = $value;
     }

@@ -17,27 +17,35 @@ final class Connection
      */
     public function connect()
     {
-        $databaseUrl = parse_url(getenv('DATABASE_URL'));
+        $databaseUrl = getenv('DATABASE_URL');
         if ($databaseUrl === false) {
-            throw new \Exception("Error reading database configuration file");
+            throw new \Exception("Error reading database configuration file.");
+        }
+        $parsedDatabaseUrl = parse_url($databaseUrl);
+        if ($parsedDatabaseUrl === false) {
+            throw new \Exception("Error parsing databaseUrl.");
         }
 
-        $databaseName = ltrim($databaseUrl['path'], '/');
+        $databaseName = ltrim($parsedDatabaseUrl['path'], '/');
         // $databasePassword = getenv('PGPASSWORD');
         // $databaseUser = getenv('PGUSER');
         $conStr = sprintf(
             "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
-            $databaseUrl['host'],
-            $databaseUrl['port'],
+            $parsedDatabaseUrl['host'],
+            $parsedDatabaseUrl['port'],
             $databaseName,
-            $databaseUrl['user'],
-            $databaseUrl['pass']
+            $parsedDatabaseUrl['user'],
+            $parsedDatabaseUrl['pass']
         );
 
         $pdo = new \PDO($conStr);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $dbMigrations = explode("\n\n", file_get_contents('../database.sql'));
+        $migrationsFileContents = file_get_contents('../database.sql');
+        if ($migrationsFileContents === false) {
+            throw new \Exception('No such file database.sql');
+        }
+        $dbMigrations = explode("\n\n", $migrationsFileContents);
         foreach ($dbMigrations as $sql) {
             $pdo->exec($sql);
         }
