@@ -105,7 +105,7 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
         'errors' => $errors,
         'urlName' => $urlName,
     ];
-    return $this->get('renderer')->render($response, "index.html", $params);
+    return $this->get('renderer')->render($response, "index.html", $params)->withStatus(422);
 });
 
 $app->post('/urls/{id}/checks', function (Request $request, Response $response, array $args) use ($router) {
