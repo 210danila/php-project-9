@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d7c9a746793a22d16ea1bff2869ee337",
+    "content-hash": "a53391c4801c57cbc6bc54e87b2c9bd7",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -746,23 +746,25 @@
         },
         {
             "name": "imangazaliev/didom",
-            "version": "1.13",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Imangazaliev/DiDOM.git",
-                "reference": "10c4033d56e599f09183959ed90bf17519b9e38b"
+                "reference": "50fa6595d14f22c0c984efed5c818485cf548136"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Imangazaliev/DiDOM/zipball/10c4033d56e599f09183959ed90bf17519b9e38b",
-                "reference": "10c4033d56e599f09183959ed90bf17519b9e38b",
+                "url": "https://api.github.com/repos/Imangazaliev/DiDOM/zipball/50fa6595d14f22c0c984efed5c818485cf548136",
+                "reference": "50fa6595d14f22c0c984efed5c818485cf548136",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.4"
+                "ext-dom": "*",
+                "ext-iconv": "*",
+                "php": ">=7.2"
             },
             "require-dev": {
-                "phpunit/phpunit": "^4.8"
+                "phpunit/phpunit": "^8.5"
             },
             "type": "library",
             "autoload": {
@@ -790,9 +792,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Imangazaliev/DiDOM/issues",
-                "source": "https://github.com/Imangazaliev/DiDOM/tree/develop"
+                "source": "https://github.com/Imangazaliev/DiDOM/tree/2.0.1"
             },
-            "time": "2017-12-08T15:20:07+00:00"
+            "time": "2023-03-05T03:23:48+00:00"
         },
         {
             "name": "laminas/laminas-diactoros",

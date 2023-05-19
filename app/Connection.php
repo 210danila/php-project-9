@@ -28,8 +28,6 @@ final class Connection
             throw new \Exception("Error parsing databaseUrl.");
         }
 
-        // $databasePassword = getenv('PGPASSWORD');
-        // $databaseUser = getenv('PGUSER');
         $conStr = sprintf(
             "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
             Arr::get($parsedDatabaseUrl, 'host'),
