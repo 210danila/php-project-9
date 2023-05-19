@@ -6,17 +6,8 @@ use Illuminate\Support\Arr;
 
 final class Connection
 {
-    /**
-     * Connection
-     * тип @var
-     */
     private static ?Connection $conn = null;
 
-    /**
-     * Подключение к базе данных и возврат экземпляра объекта \PDO
-     * @return \PDO
-     * @throws \Exception
-     */
     public function connect()
     {
         $databaseUrl = getenv('DATABASE_URL');
@@ -52,10 +43,6 @@ final class Connection
         return $pdo;
     }
 
-    /**
-     * возврат экземпляра объекта Connection
-     * тип @return
-     */
     public static function get()
     {
         if (null === static::$conn) {

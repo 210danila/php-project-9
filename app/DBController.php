@@ -62,12 +62,20 @@ class DBController
 
     public function values(array $data)
     {
-        $colomns = collect($data)->keys()->implode(', ');
-        $valuesNames = collect($data)->keys()->map(fn($column) => ":{$column}")->implode(', ');
+        $colomns = collect($data)
+            ->keys()
+            ->implode(', ');
+        $valuesNames = collect($data)
+            ->keys()
+            ->map(fn($column) => ":{$column}")
+            ->implode(', ');
 
-        $sql = $this->getQueryParam('sql');
-        $newSql = $sql . " ({$colomns}, created_at) VALUES({$valuesNames}, :time)";
-        $this->setQueryParam('sql', $newSql);
+        $sql = $this->getQueryParam('sql') .
+            <<<INSERTVALUES
+            ({$colomns}, created_at) 
+            VALUES({$valuesNames}, :time)
+            INSERTVALUES;
+        $this->setQueryParam('sql', $sql);
         $this->setQueryParam('insertData', $data);
         return $this;
     }

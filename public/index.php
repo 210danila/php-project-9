@@ -12,7 +12,6 @@ if (file_exists($autoloadPath1)) {
 use Slim\Http\{Response, ServerRequest as Request};
 use Slim\Factory\AppFactory;
 use DI\Container;
-use Illuminate\Support\Arr;
 use function App\Functions\{getController, validateUrl, normalizeUrl, generateUrlCheck};
 
 session_start();
@@ -48,7 +47,11 @@ $app->get('/urls', function (Request $request, Response $response) {
             ->where('url_id', $url['id'])
             ->orderBy('created_at', 'DESC')
             ->exec(true);
-        return ['name' => $url['name'], 'id' => $url['id'], 'check' => $check];
+        return [
+            'name' => $url['name'],
+            'id' => $url['id'],
+            'check' => $check
+        ];
     }, $urls);
 
     $params = ['urlsData' => $urlsData];
