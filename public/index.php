@@ -9,10 +9,10 @@ if (file_exists($autoloadPath1)) {
     require_once $autoloadPath2;
 }
 
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Http\{Response, ServerRequest as Request};
 use Slim\Factory\AppFactory;
 use DI\Container;
+use Illuminate\Support\Arr;
 use function App\Functions\{getController, validateUrl, normalizeUrl, generateUrlCheck};
 
 session_start();
@@ -77,12 +77,8 @@ $app->get('/urls/{id}', function (Request $request, Response $response, array $a
 })->setName('url');
 
 $app->post('/urls', function (Request $request, Response $response) use ($router) {
-    $body = $request->getParsedBody();
-    if (is_null($body)) {
-        throw new \Exception('No body provided in the request.');
-    }
-    $urlName = $body['url']['name'];
-    
+    $urlName = $request->getParsedBodyParam('url')['name'];
+
     $normalizedUrlName = normalizeUrl($urlName);
     $errors = validateUrl($normalizedUrlName);
     $controller = getController();
@@ -103,15 +99,17 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
         }
 
         $redirectRoute = $router->urlFor('url', ['id' => (string) $urlId]);
-        $responseWithRedirect = $response->withRedirect($redirectRoute, 302);
-        return $responseWithRedirect;
+        return $response->withRedirect($redirectRoute, 302);
     }
 
     $params = [
         'errors' => $errors,
         'urlName' => $urlName,
     ];
-    return $this->get('renderer')->render($response, "index.html", $params)->withStatus(422);
+    return $this
+        ->get('renderer')
+        ->render($response, "index.html", $params)
+        ->withStatus(422);
 });
 
 $app->post('/urls/{id}/checks', function (Request $request, Response $response, array $args) use ($router) {
