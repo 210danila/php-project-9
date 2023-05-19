@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Support\Arr;
+
 final class Connection
 {
     /**
@@ -26,16 +28,15 @@ final class Connection
             throw new \Exception("Error parsing databaseUrl.");
         }
 
-        $databaseName = ltrim($parsedDatabaseUrl['path'], '/');
         // $databasePassword = getenv('PGPASSWORD');
         // $databaseUser = getenv('PGUSER');
         $conStr = sprintf(
             "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
-            $parsedDatabaseUrl['host'],
-            $parsedDatabaseUrl['port'],
-            $databaseName,
-            $parsedDatabaseUrl['user'],
-            $parsedDatabaseUrl['pass']
+            Arr::get($parsedDatabaseUrl, 'host'),
+            Arr::get($parsedDatabaseUrl, 'port'),
+            ltrim(Arr::get($parsedDatabaseUrl, 'path'), '/'),
+            Arr::get($parsedDatabaseUrl, 'user'),
+            Arr::get($parsedDatabaseUrl, 'pass')
         );
 
         $pdo = new \PDO($conStr);

@@ -77,7 +77,12 @@ $app->get('/urls/{id}', function (Request $request, Response $response, array $a
 })->setName('url');
 
 $app->post('/urls', function (Request $request, Response $response) use ($router) {
-    $urlName = $request->getParsedBody()['url']['name'];
+    $body = $request->getParsedBody();
+    if (is_null($body)) {
+        throw new \Exception('No body provided in the request.');
+    }
+    $urlName = $body['url']['name'];
+    
     $normalizedUrlName = normalizeUrl($urlName);
     $errors = validateUrl($normalizedUrlName);
     $controller = getController();
@@ -98,7 +103,8 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
         }
 
         $redirectRoute = $router->urlFor('url', ['id' => (string) $urlId]);
-        return $response->withRedirect($redirectRoute, 302);
+        $responseWithRedirect = $response->withRedirect($redirectRoute, 302);
+        return $responseWithRedirect;
     }
 
     $params = [

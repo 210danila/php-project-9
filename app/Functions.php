@@ -6,6 +6,7 @@ use App\Connection;
 use App\DBController;
 use DiDom\Document;
 use GuzzleHttp\Client;
+use Illuminate\Support\Arr;
 
 function getController()
 {
@@ -36,7 +37,9 @@ function normalizeUrl(string $urlName)
     if ($parsedUrl === false) {
         return $urlName;
     }
-    return $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+    $sheme = Arr::get($parsedUrl, 'scheme');
+    $host = Arr::get($parsedUrl, 'host');
+    return $sheme . '://' . $host;
 }
 
 function generateUrlCheck(array $url)
