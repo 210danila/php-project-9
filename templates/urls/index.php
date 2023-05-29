@@ -9,24 +9,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
 	</head>
 	<body class="min-vh-100 d-flex flex-column">
-		<header class="flex-shrink-0">
-			<nav class="navbar navbar-expand-md navbar-dark bg-dark px-3">
-				<a class="navbar-brand" href="/">Анализатор страниц</a>
-				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-				<div class="collapse navbar-collapse" id="navbarNav">
-					<ul class="navbar-nav">
-						<li class="nav-item">
-							<a class="nav-link" href="/">Главная</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link active" href="/urls">Сайты</a>
-						</li>
-					</ul>
-				</div>
-			</nav>
-		</header>
+		<?php include(__DIR__ . '/../header.php'); ?>
 	
 		<main class="flex-grow-1">
 			<div class="container-lg mt-3">
@@ -58,12 +41,7 @@
 				</div>
 			</div>
 		</main>
-		<footer class="border-top py-3 mt-5 flex-shrink-0">
-			<div class="container-lg">
-				<div class="text-center">
-					<a href="https://hexlet.io/pages/about" target="_blank">Hexlet</a>
-				</div>
-			</div>
-		</footer>
+
+		<?php include(__DIR__ . '/../footer.php'); ?>
 	</body>
 </html>

@@ -29,15 +29,17 @@ $app->addErrorMiddleware(true, true, true);
 
 $router = $app->getRouteCollector()->getRouteParser();
 
-$app->get('/', function (Request $request, Response $response) {
+$app->get('/', function (Request $request, Response $response) use ($router) {
     $params = [
         'errors' => [],
-        'urlName' => ''
+        'urlName' => '',
+        'router' => $router,
+        'activeLink' => 'Главная'
     ];
-    return $this->get('renderer')->render($response, "index.html", $params);
+    return $this->get('renderer')->render($response, "index.php", $params);
 })->setName('root');
 
-$app->get('/urls', function (Request $request, Response $response) {
+$app->get('/urls', function (Request $request, Response $response) use ($router) {
     $controller = getController();
     $urls = $controller->makeQuery('select', 'urls')
         ->orderBy('id', 'DESC')
@@ -54,11 +56,15 @@ $app->get('/urls', function (Request $request, Response $response) {
         ];
     }, $urls);
 
-    $params = ['urlsData' => $urlsData];
-    return $this->get('renderer')->render($response, "urls.html", $params);
-})->setName('urls');
+    $params = [
+        'urlsData' => $urlsData,
+        'router' => $router,
+        'activeLink' => 'Сайты'
+    ];
+    return $this->get('renderer')->render($response, "urls/index.php", $params);
+})->setName('urls.index');
 
-$app->get('/urls/{id}', function (Request $request, Response $response, array $args) {
+$app->get('/urls/{id}', function (Request $request, Response $response, array $args) use ($router) {
     $controller = getController();
     $urlId = (int) $args['id'];
 
@@ -74,10 +80,12 @@ $app->get('/urls/{id}', function (Request $request, Response $response, array $a
     $params = [
         'url' => $url,
         'urlChecks' => $urlChecks,
-        'flash' => $flashMessages
+        'flash' => $flashMessages,
+        'router' => $router,
+        'activeLink' => ''
     ];
-    return $this->get('renderer')->render($response, "url.html", $params);
-})->setName('url');
+    return $this->get('renderer')->render($response, "urls/show.php", $params);
+})->setName('urls.show');
 
 $app->post('/urls', function (Request $request, Response $response) use ($router) {
     $urlName = $request->getParsedBodyParam('url')['name'];
@@ -101,19 +109,21 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
             $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
         }
 
-        $redirectRoute = $router->urlFor('url', ['id' => (string) $urlId]);
+        $redirectRoute = $router->urlFor('urls.show', ['id' => (string) $urlId]);
         return $response->withRedirect($redirectRoute, 302);
     }
 
     $params = [
         'errors' => $errors,
         'urlName' => $urlName,
+        'router' => $router,
+        'activeLink' => 'Сайты'
     ];
     return $this
         ->get('renderer')
-        ->render($response, "index.html", $params)
+        ->render($response, "index.php", $params)
         ->withStatus(422);
-});
+})->setName('urls.store');
 
 $app->post('/urls/{id}/checks', function (Request $request, Response $response, array $args) use ($router) {
     $controller = getController();
@@ -134,8 +144,8 @@ $app->post('/urls/{id}/checks', function (Request $request, Response $response, 
         не удалось подключиться';
         $this->get('flash')->addMessage('error', $flashMessage);
     }
-    $redirectRoute = $router->urlFor('url', ['id' => (string) $urlId]);
+    $redirectRoute = $router->urlFor('urls.show', ['id' => (string) $urlId]);
     return $response->withRedirect($redirectRoute, 302);
-});
+})->setName('urls.checks.store');
 
 $app->run();

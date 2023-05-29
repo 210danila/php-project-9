@@ -10,33 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
   </head>
   <body class="min-vh-100 d-flex flex-column">
-    <header class="flex-shrink-0">
-      <nav class="navbar navbar-expand-md navbar-dark bg-dark px-3">
-      <a class="navbar-brand" href="/">Анализатор страниц</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <?php if (empty($errors)) : ?>
-              <li class="nav-item">
-                <a class="nav-link active" href="/">Главная</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/urls">Сайты</a>
-              </li>
-            <?php else : ?>
-              <li class="nav-item">
-                <a class="nav-link" href="/">Главная</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" href="/urls">Сайты</a>
-              </li>
-            <?php endif; ?>
-          </ul>
-        </div>
-      </nav>
-    </header>
+    <?php include(__DIR__ . '/header.php'); ?>
 
     <main class="flex-grow-1">
       <div class="container-lg mt-3">
@@ -46,7 +20,7 @@
             <h1 class="display-3">Анализатор страниц</h1>
             <p class="lead">Бесплатно проверяйте сайты на SEO пригодность</p>
 
-            <form action="/urls" method="post" class="row" required="">
+            <form action="<?= $router->urlFor('urls.index') ?>" method="post" class="row" required="">
               <div class="col-8">
 
                 <?php if (empty($errors)) : ?>
@@ -65,10 +39,11 @@
                 <input type="submit" class="btn btn-primary btn-lg ms-3 px-5 text-uppercase mx-3" value="Проверить">
               </div>
             </form>
-
           </div>
         </div>
       </div>
     </main>
+
+    <?php include(__DIR__ . '/footer.php'); ?>
   </body>
 </html>
