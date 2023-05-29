@@ -27,13 +27,13 @@
                 <tr>
                   <td><?= htmlspecialchars($url['name']) ?></td>
                   <td><a href="/urls/<?= $url['id'] ?>"><?= htmlspecialchars($url['name']) ?></a></td>
-                  <?php if (!empty($url['check'])) : ?>
-                    <td><?= $url['check']['created_at'] ?></td>
-                    <td><?= $url['check']['status_code'] ?></td>
-                  <?php else: ?>
-                    <td></td>
-                    <td></td>
-                  <?php endif; ?>
+                    <?php if (!empty($url['check'])) : ?>
+                      <td><?= $url['check']['created_at'] ?></td>
+                      <td><?= $url['check']['status_code'] ?></td>
+                    <?php else : ?>
+                      <td></td>
+                      <td></td>
+                    <?php endif; ?>
                 </tr>
               <?php endforeach; ?>
             </tbody>
