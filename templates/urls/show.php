@@ -13,11 +13,11 @@
     <?php include(__DIR__ . '/../header.php'); ?>
 
     <?php if (isset($flash) && isset($url) && isset($router) && isset($urlChecks)) : ?>
-      <?php if (array_key_exists('success', $flash)) : ?>
+        <?php if (array_key_exists('success', $flash)) : ?>
         <div class="alert alert-success"><?= $flash['success'][0] ?></div>
-      <?php elseif (array_key_exists('error', $flash)) : ?>
+        <?php elseif (array_key_exists('error', $flash)) : ?>
         <div class="alert alert-danger"><?= $flash['error'][0] ?></div>
-      <?php endif; ?>
+        <?php endif; ?>
       
       <main class="flex-grow-1">
         <div class="container-lg mt-3">
