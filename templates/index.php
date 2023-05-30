@@ -20,7 +20,7 @@
             <h1 class="display-3">Анализатор страниц</h1>
             <p class="lead">Бесплатно проверяйте сайты на SEO пригодность</p>
 
-            <form action="<?= $router->urlFor('urls.index') ?>" method="post" class="row" required="">
+            <form action="<?= $router->urlFor('urls.store') ?>" method="post" class="row" required="">
               <div class="col-8">
 
                 <?php if (empty($errors)) : ?>
