@@ -24,19 +24,19 @@
                 <th>Код ответа</th>
               </tr>
               <?php if (isset($urlsData)) : ?>
-                  <?php foreach ($urlsData as $url) : ?>
-                  <tr>
-                    <td><?= htmlspecialchars($url['name']) ?></td>
-                    <td><a href="/urls/<?= $url['id'] ?>"><?= htmlspecialchars($url['name']) ?></a></td>
-                      <?php if (!empty($url['check'])) : ?>
-                      <td><?= $url['check']['created_at'] ?></td>
-                      <td><?= $url['check']['status_code'] ?></td>
-                      <?php else : ?>
-                      <td></td>
-                      <td></td>
-                      <?php endif; ?>
-                  </tr>
-                  <?php endforeach; ?>
+                    <?php foreach ($urlsData as $url) : ?>
+                    <tr>
+                      <td><?= htmlspecialchars($url['name']) ?></td>
+                      <td><a href="/urls/<?= $url['id'] ?>"><?= htmlspecialchars($url['name']) ?></a></td>
+                        <?php if (!empty($url['check'])) : ?>
+                        <td><?= $url['check']['created_at'] ?></td>
+                        <td><?= $url['check']['status_code'] ?></td>
+                        <?php else : ?>
+                        <td></td>
+                        <td></td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php endforeach; ?>
               <?php endif; ?>
             </tbody>
           </table>
