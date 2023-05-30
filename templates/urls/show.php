@@ -12,61 +12,63 @@
   <body class="min-vh-100 d-flex flex-column">
     <?php include(__DIR__ . '/../header.php'); ?>
 
-    <?php if (array_key_exists('success', $flash)) : ?>
-      <div class="alert alert-success"><?= $flash['success'][0] ?></div>
-    <?php elseif (array_key_exists('error', $flash)) : ?>
-      <div class="alert alert-danger"><?= $flash['error'][0] ?></div>
-    <?php endif; ?>
-    
-    <main class="flex-grow-1">
-      <div class="container-lg mt-3">
-        <h1>Сайт: <?= htmlspecialchars($url['name']) ?></h1>
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover text-nowrap" data-test="url">
+    <?php if (isset($flash) && isset($url) && isset($router) && isset($urlChecks)) : ?>
+      <?php if (array_key_exists('success', $flash)) : ?>
+        <div class="alert alert-success"><?= $flash['success'][0] ?></div>
+      <?php elseif (array_key_exists('error', $flash)) : ?>
+        <div class="alert alert-danger"><?= $flash['error'][0] ?></div>
+      <?php endif; ?>
+      
+      <main class="flex-grow-1">
+        <div class="container-lg mt-3">
+          <h1>Сайт: <?= htmlspecialchars($url['name']) ?></h1>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover text-nowrap" data-test="url">
+              <tbody>
+                <tr>
+                  <td>ID</td>
+                  <td><?= $url['id'] ?></td>
+                </tr>
+                <tr>
+                  <td>Имя</td>
+                  <td><?= htmlspecialchars($url['name']) ?></td>
+                </tr>
+                <tr>
+                  <td>Дата создания</td>
+                  <td><?= $url['created_at'] ?></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h2 class="mt-5 mb-3">Проверки</h2>
+          <form method="post" action="<?= $router->urlFor('urls.checks.store', ['id' => $url['id']]) ?>" style="margin-bottom: 1em;">
+            <input type="submit" class="btn btn-primary" value="Запустить проверку">
+          </form>
+          <table class="table table-bordered table-hover" data-test="checks">
             <tbody>
               <tr>
-                <td>ID</td>
-                <td><?= $url['id'] ?></td>
+                <th>ID</th>
+                <th>Код ответа</th>
+                <th>h1</th>
+                <th>title</th>
+                <th>description</th>
+                <th>Дата создания</th>
               </tr>
-              <tr>
-                <td>Имя</td>
-                <td><?= htmlspecialchars($url['name']) ?></td>
-              </tr>
-              <tr>
-                <td>Дата создания</td>
-                <td><?= $url['created_at'] ?></td>
-              </tr>
+              <?php foreach ($urlChecks as $check) : ?>
+                <tr>
+                  <td><?= $check['id'] ?></td>
+                  <td><?= $check['status_code'] ?></td>
+                  <td><?= $check['h1'] ?></td>
+                  <td><?= $check['title'] ?></td>
+                  <td><?= $check['description'] ?></td>
+                  <td><?= $check['created_at'] ?></td>
+                </tr>
+              <?php endforeach; ?>
             </tbody>
           </table>
         </div>
-        <h2 class="mt-5 mb-3">Проверки</h2>
-        <form method="post" action="<?= $router->urlFor('urls.checks.store', ['id' => $url['id']]) ?>" style="margin-bottom: 1em;">
-          <input type="submit" class="btn btn-primary" value="Запустить проверку">
-        </form>
-        <table class="table table-bordered table-hover" data-test="checks">
-          <tbody>
-            <tr>
-              <th>ID</th>
-              <th>Код ответа</th>
-              <th>h1</th>
-              <th>title</th>
-              <th>description</th>
-              <th>Дата создания</th>
-            </tr>
-            <?php foreach ($urlChecks as $check) : ?>
-              <tr>
-                <td><?= $check['id'] ?></td>
-                <td><?= $check['status_code'] ?></td>
-                <td><?= $check['h1'] ?></td>
-                <td><?= $check['title'] ?></td>
-                <td><?= $check['description'] ?></td>
-                <td><?= $check['created_at'] ?></td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      </div>
-    </main>
+      </main>
+    <?php endif; ?>
 
     <?php include(__DIR__ . '/../footer.php'); ?>
   </body>
