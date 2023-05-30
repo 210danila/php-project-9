@@ -28,9 +28,9 @@
                 <?php else : ?>
                     <?php if (empty($urlName)) : ?>
                     <input type="text" name="url[name]" value="" class="form-control form-control-lg is-invalid" placeholder="https://www.example.com">
-                  <?php else : ?>
+                    <?php else : ?>
                     <input type="text" name="url[name]" value=<?= htmlspecialchars($urlName) ?> class="form-control form-control-lg is-invalid" placeholder="https://www.example.com">
-                  <?php endif; ?>
+                    <?php endif; ?>
                   <div class="invalid-feedback"><?= $errors[0] ?></div>
                 <?php endif; ?>
 
