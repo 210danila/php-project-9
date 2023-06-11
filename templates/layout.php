@@ -19,7 +19,7 @@
         <?php endif; ?>
     <?php endif; ?>
     <?php if (isset($content)) : ?>
-      <?=$content?>
+        <?=$content?>
     <?php endif; ?>
     <?php include(__DIR__ . '/footer.php'); ?>
   </body>
