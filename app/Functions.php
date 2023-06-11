@@ -8,12 +8,6 @@ use DiDom\Document;
 use GuzzleHttp\Client;
 use Illuminate\Support\Arr;
 
-function getController()
-{
-    $pdo = Connection::get()->connect();
-    return new DBController($pdo);
-}
-
 function validateUrl(string $url)
 {
     if (empty($url)) {
@@ -30,10 +24,10 @@ function validateUrl(string $url)
 
 function normalizeUrl(string $urlName)
 {
-    $parsedUrl = parse_url($urlName);
     if (empty($urlName)) {
         return '';
     }
+    $parsedUrl = parse_url($urlName);
     if ($parsedUrl === false) {
         return $urlName;
     }

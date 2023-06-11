@@ -7,24 +7,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    <?php if ($activeLink === 'Главная') : ?>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="<?= $router->urlFor('root') ?>">Главная</a>
-                        </li>
-                    <?php else : ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= $router->urlFor('root') ?>">Главная</a>
-                        </li>
-                    <?php endif; ?>
-                    <?php if ($activeLink === 'Сайты') : ?>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="<?= $router->urlFor('urls.index') ?>">Сайты</a>
-                        </li>
-                    <?php else : ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= $router->urlFor('urls.index') ?>">Сайты</a>
-                        </li>
-                    <?php endif; ?>
+                    <li class="nav-item">
+                        <a class="nav-link<?= $activeLink === 'Главная' ? ' active' : '' ?>" href="<?= $router->urlFor('root') ?>">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link<?= $activeLink === 'Сайты' ? ' active' : '' ?>" href="<?= $router->urlFor('urls.index') ?>">Сайты</a>
+                    </li>
                 </ul>
             </div>
         <?php endif; ?>

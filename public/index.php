@@ -10,19 +10,16 @@ if (file_exists($autoloadPath1)) {
 }
 
 use Slim\Http\{Response, ServerRequest as Request};
+use Slim\Exception\HttpException;
 use Slim\Factory\AppFactory;
 use DI\Container;
-use function App\Functions\{getController, validateUrl, normalizeUrl, generateUrlCheck};
+use function App\Functions\{validateUrl, normalizeUrl, generateUrlCheck};
 
 session_start();
 
 $container = new Container();
-$container->set('renderer', function () {
-    return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
-});
-$container->set('flash', function () {
-    return new \Slim\Flash\Messages();
-});
+$dependencies = require __DIR__ . '/dependencies.php';
+$dependencies($container);
 
 $app = AppFactory::createFromContainer($container);
 $app->addErrorMiddleware(true, true, true);
@@ -40,12 +37,13 @@ $app->get('/', function (Request $request, Response $response) use ($router) {
 })->setName('root');
 
 $app->get('/urls', function (Request $request, Response $response) use ($router) {
-    $controller = getController();
-    $urls = $controller->makeQuery('select', 'urls')
+    $urls = $this->get('db')
+        ->makeQuery('select', 'urls')
         ->orderBy('id', 'DESC')
         ->exec();
-    $urlsData = array_map(function ($url) use ($controller) {
-        $check = $controller->makeQuery('select', 'url_checks')
+    $urlsData = array_map(function ($url) {
+        $check = $this->get('db')
+            ->makeQuery('select', 'url_checks')
             ->where('url_id', $url['id'])
             ->orderBy('created_at', 'DESC')
             ->exec(true);
@@ -65,13 +63,14 @@ $app->get('/urls', function (Request $request, Response $response) use ($router)
 })->setName('urls.index');
 
 $app->get('/urls/{id}', function (Request $request, Response $response, array $args) use ($router) {
-    $controller = getController();
     $urlId = (int) $args['id'];
 
-    $url = $controller->makeQuery('select', 'urls')
+    $url = $this->get('db')
+        ->makeQuery('select', 'urls')
         ->where('id', $urlId)
         ->exec(true);
-    $urlChecks = $controller->makeQuery('select', 'url_checks')
+    $urlChecks = $this->get('db')
+        ->makeQuery('select', 'url_checks')
         ->where('url_id', $urlId)
         ->orderBy('id', 'DESC')
         ->exec();
@@ -92,10 +91,10 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
 
     $normalizedUrlName = normalizeUrl($urlName);
     $errors = validateUrl($normalizedUrlName);
-    $controller = getController();
 
     if (empty($errors)) {
-        $sameUrl = $controller->makeQuery('select', 'urls')
+        $sameUrl = $this->get('db')
+            ->makeQuery('select', 'urls')
             ->where('name', $normalizedUrlName)
             ->exec(true);
 
@@ -103,7 +102,8 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
             $this->get('flash')->addMessage('success', 'Страница уже существует');
             $urlId = $sameUrl['id'];
         } else {
-            $urlId = $controller->makeQuery('insert', 'urls')
+            $urlId = $this->get('db')
+                ->makeQuery('insert', 'urls')
                 ->values(['name' => $normalizedUrlName])
                 ->exec();
             $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
@@ -126,20 +126,21 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
 })->setName('urls.store');
 
 $app->post('/urls/{id}/checks', function (Request $request, Response $response, array $args) use ($router) {
-    $controller = getController();
     $urlId = (int) $args['id'];
-    $url = $controller->makeQuery('select', 'urls')
+    $url = $this->get('db')
+        ->makeQuery('select', 'urls')
         ->where('id', $urlId)
         ->exec(true);
 
     try {
         $values = generateUrlCheck($url);
-        $controller->makeQuery('insert', 'url_checks')
+        $this->get('db')
+            ->makeQuery('insert', 'url_checks')
             ->values($values)
             ->exec();
         $flashMessage = 'Страница успешно проверена';
         $this->get('flash')->addMessage('success', $flashMessage);
-    } catch (\Exception $e) {
+    } catch (HttpException $e) {
         $flashMessage = 'Произошла ошибка при проверке,
         не удалось подключиться';
         $this->get('flash')->addMessage('error', $flashMessage);
