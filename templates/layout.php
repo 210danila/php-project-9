@@ -18,7 +18,9 @@
         <div class="alert alert-danger"><?= $flash['error'][0] ?></div>
         <?php endif; ?>
     <?php endif; ?>
-    <?=$content?>
+    <?php if (isset($content)) : ?>
+      <?=$content?>
+    <?php endif; ?>
     <?php include(__DIR__ . '/footer.php'); ?>
   </body>
 <html>

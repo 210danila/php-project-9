@@ -10,7 +10,7 @@
             <th>Последняя проверка</th>
             <th>Код ответа</th>
           </tr>
-          <?php if (isset($urlsData)) : ?>
+          <?php if (isset($urlsData) and isset($router)) : ?>
                 <?php foreach ($urlsData as $url) : ?>
                 <tr>
                   <td><?= htmlspecialchars($url['name']) ?></td>

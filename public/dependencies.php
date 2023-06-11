@@ -1,10 +1,10 @@
 <?php
 
-use Psr\Container\ContainerInterface;
 use App\{Connection, DBController};
 use Slim\Views\PhpRenderer;
+use DI\Container;
 
-return function (ContainerInterface $container) {
+return function (Container $container) {
     $container->set('renderer', function () {
         $phpView = new PhpRenderer(__DIR__ . '/../templates');
         $phpView->setLayout('layout.php');
