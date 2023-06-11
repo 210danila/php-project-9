@@ -10,7 +10,7 @@ if (file_exists($autoloadPath1)) {
 }
 
 use Slim\Http\{Response, ServerRequest as Request};
-use Slim\Exception\HttpException;
+use GuzzleHttp\Exception\TransferException;
 use Slim\Factory\AppFactory;
 use DI\Container;
 use function App\Functions\{validateUrl, normalizeUrl, generateUrlCheck};
@@ -140,7 +140,7 @@ $app->post('/urls/{id}/checks', function (Request $request, Response $response, 
             ->exec();
         $flashMessage = 'Страница успешно проверена';
         $this->get('flash')->addMessage('success', $flashMessage);
-    } catch (HttpException $e) {
+    } catch (TransferException $e) {
         $flashMessage = 'Произошла ошибка при проверке,
         не удалось подключиться';
         $this->get('flash')->addMessage('error', $flashMessage);
