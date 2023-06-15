@@ -3,7 +3,7 @@
 namespace App\Functions;
 
 use DiDom\Document;
-use GuzzleHttp\{Client, Psr7};;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Arr;
 

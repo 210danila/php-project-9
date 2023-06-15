@@ -1,6 +1,4 @@
 <?php
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Exception\TransferException;
 
 $autoloadPath1 = __DIR__ .  '/../../autoload.php';
 $autoloadPath2 = __DIR__ . '/../vendor/autoload.php';
@@ -12,21 +10,15 @@ if (file_exists($autoloadPath1)) {
 }
 
 use Slim\Http\{Response, ServerRequest as Request};
-use GuzzleHttp\Exception\{ConnectException, ServerException};
+use GuzzleHttp\Exception\TransferException;
 use Slim\Factory\AppFactory;
 use DI\Container;
-use function App\Functions\{normalizeUrl, generateUrlCheck};
-
 use App\{Connection, DBController};
 use Slim\Views\PhpRenderer;
-
-// $container = new Container();
-// $dependencies = require __DIR__ . '/dependencies.php';
-// $dependencies($container);
+use function App\Functions\{normalizeUrl, generateUrlCheck};
 
 session_start();
 
-// $app = AppFactory::createFromContainer($container);
 $container = new Container();
 AppFactory::setContainer($container);
 $app = AppFactory::create();
@@ -48,8 +40,6 @@ $container->set('db', function () {
 });
 
 $app->addErrorMiddleware(true, true, true);
-
-// $router = $app->getRouteCollector()->getRouteParser();
 
 $app->get('/', function (Request $request, Response $response) {
     $params = [
