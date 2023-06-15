@@ -15,9 +15,9 @@
                 <tr>
                   <td><?= htmlspecialchars($url['name']) ?></td>
                   <td><a href="<?= $router->urlFor('urls.show', ['id' => $url['id']]) ?>"><?= htmlspecialchars($url['name']) ?></a></td>
-                    <?php if (!empty($url['check'])) : ?>
-                    <td><?= $url['check']['created_at'] ?></td>
-                    <td><?= $url['check']['status_code'] ?></td>
+                    <?php if (isset($url['check_status_code']) and isset($url['check_created_at'])) : ?>
+                    <td><?= $url['check_status_code'] ?></td>
+                    <td><?= $url['check_created_at'] ?></td>
                     <?php else : ?>
                     <td></td>
                     <td></td>

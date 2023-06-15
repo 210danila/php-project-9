@@ -10,7 +10,9 @@
   </head>
 
   <body class="min-vh-100 d-flex flex-column">
-    <?php include(__DIR__ . '/header.php'); ?>
+    <?php if (isset($activeLink)): ?>
+        <?= $this->fetch('/header.php', ['activeLink' => $activeLink]) ?>
+    <?php endif; ?>
     <?php if (isset($flash)) : ?>
         <?php if (array_key_exists('success', $flash)) : ?>
         <div class="alert alert-success"><?= $flash['success'][0] ?></div>
@@ -21,6 +23,7 @@
     <?php if (isset($content)) : ?>
         <?=$content?>
     <?php endif; ?>
-    <?php include(__DIR__ . '/footer.php'); ?>
+    <?= $this->fetch('/footer.php') ?>
+  <
   </body>
 <html>

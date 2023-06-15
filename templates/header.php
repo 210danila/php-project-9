@@ -1,5 +1,6 @@
 <header class="flex-shrink-0">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark px-3">
+        
         <?php if (isset($router) && isset($activeLink)) : ?>
             <a class="navbar-brand" href="<?= $router->urlFor('root') ?>">Анализатор страниц</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

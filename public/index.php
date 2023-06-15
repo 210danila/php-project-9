@@ -1,4 +1,6 @@
 <?php
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\TransferException;
 
 $autoloadPath1 = __DIR__ .  '/../../autoload.php';
 $autoloadPath2 = __DIR__ . '/../vendor/autoload.php';
@@ -10,59 +12,85 @@ if (file_exists($autoloadPath1)) {
 }
 
 use Slim\Http\{Response, ServerRequest as Request};
-use GuzzleHttp\Exception\TransferException;
+use GuzzleHttp\Exception\{ConnectException, ServerException};
 use Slim\Factory\AppFactory;
 use DI\Container;
-use function App\Functions\{validateUrl, normalizeUrl, generateUrlCheck};
+use function App\Functions\{normalizeUrl, generateUrlCheck};
+
+use App\{Connection, DBController};
+use Slim\Views\PhpRenderer;
+
+// $container = new Container();
+// $dependencies = require __DIR__ . '/dependencies.php';
+// $dependencies($container);
 
 session_start();
 
+// $app = AppFactory::createFromContainer($container);
 $container = new Container();
-$dependencies = require __DIR__ . '/dependencies.php';
-$dependencies($container);
+AppFactory::setContainer($container);
+$app = AppFactory::create();
 
-$app = AppFactory::createFromContainer($container);
+$container = $app->getContainer();
+$container->set('router', $app->getRouteCollector()->getRouteParser());
+$container->set('renderer', function ($container) {
+    $phpView = new PhpRenderer(__DIR__ . '/../templates');
+    $phpView->addAttribute('router', $container->get('router'));
+    $phpView->setLayout('layout.php');
+    return $phpView;
+});
+$container->set('flash', function () {
+    return new \Slim\Flash\Messages();
+});
+$container->set('db', function () {
+    $pdo = Connection::get()->connect();
+    return new DBController($pdo);
+});
+
 $app->addErrorMiddleware(true, true, true);
 
-$router = $app->getRouteCollector()->getRouteParser();
+// $router = $app->getRouteCollector()->getRouteParser();
 
-$app->get('/', function (Request $request, Response $response) use ($router) {
+$app->get('/', function (Request $request, Response $response) {
     $params = [
         'errors' => [],
         'urlName' => '',
-        'router' => $router,
         'activeLink' => 'Главная'
     ];
     return $this->get('renderer')->render($response, "index.php", $params);
 })->setName('root');
 
-$app->get('/urls', function (Request $request, Response $response) use ($router) {
+$app->get('/urls', function (Request $request, Response $response) {
     $urls = $this->get('db')
         ->makeQuery('select', 'urls')
         ->orderBy('id', 'DESC')
         ->exec();
-    $urlsData = array_map(function ($url) {
-        $check = $this->get('db')
-            ->makeQuery('select', 'url_checks')
-            ->where('url_id', $url['id'])
-            ->orderBy('created_at', 'DESC')
-            ->exec(true);
+    $urlChecks = $this->get('db')
+        ->makeQuery('select', 'url_checks')
+        ->distinct('url_id')
+        ->orderBy('url_id, created_at', 'DESC')
+        ->exec();
+    $checkSatusCodes = collect($urlChecks)->pluck('status_code', 'url_id')->toArray();
+    $checkTimestamps = collect($urlChecks)->pluck('created_at', 'url_id')->toArray();
+
+    $urlsData = array_map(function ($url) use ($checkSatusCodes, $checkTimestamps) {
+        $url_id = $url['id'];
         return [
             'name' => $url['name'],
-            'id' => $url['id'],
-            'check' => $check
+            'id' => $url_id,
+            'check_status_code' => $checkSatusCodes[$url_id] ?? '',
+            'check_created_at' => $checkTimestamps[$url_id] ?? ''
         ];
     }, $urls);
 
     $params = [
         'urlsData' => $urlsData,
-        'router' => $router,
         'activeLink' => 'Сайты'
     ];
     return $this->get('renderer')->render($response, "urls/index.php", $params);
 })->setName('urls.index');
 
-$app->get('/urls/{id}', function (Request $request, Response $response, array $args) use ($router) {
+$app->get('/urls/{id:\d+}', function (Request $request, Response $response, array $args) {
     $urlId = (int) $args['id'];
 
     $url = $this->get('db')
@@ -80,17 +108,23 @@ $app->get('/urls/{id}', function (Request $request, Response $response, array $a
         'url' => $url,
         'urlChecks' => $urlChecks,
         'flash' => $flashMessages,
-        'router' => $router,
         'activeLink' => ''
     ];
     return $this->get('renderer')->render($response, "urls/show.php", $params);
 })->setName('urls.show');
 
-$app->post('/urls', function (Request $request, Response $response) use ($router) {
+$app->post('/urls', function (Request $request, Response $response) {
     $urlName = $request->getParsedBodyParam('url')['name'];
-
     $normalizedUrlName = normalizeUrl($urlName);
-    $errors = validateUrl($normalizedUrlName);
+
+    $validator = new \Valitron\Validator(['name' => $normalizedUrlName]);
+    $validator->rule('required', 'name')
+        ->rule('lengthMax', 'name', 255)
+        ->rule('url', 'name');
+    $errors =  $validator->validate() ? [] : ['Некорректный URL'];
+    if (empty($normalizedUrlName)) {
+        $errors = ['URL не должен быть пустым'];
+    }
 
     if (empty($errors)) {
         $sameUrl = $this->get('db')
@@ -109,14 +143,13 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
             $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
         }
 
-        $redirectRoute = $router->urlFor('urls.show', ['id' => (string) $urlId]);
+        $redirectRoute = $this->get('router')->urlFor('urls.show', ['id' => (string) $urlId]);
         return $response->withRedirect($redirectRoute, 302);
     }
 
     $params = [
         'errors' => $errors,
-        'urlName' => $urlName,
-        'router' => $router,
+        'urlName' => $normalizedUrlName,
         'activeLink' => 'Сайты'
     ];
     return $this
@@ -125,7 +158,7 @@ $app->post('/urls', function (Request $request, Response $response) use ($router
         ->withStatus(422);
 })->setName('urls.store');
 
-$app->post('/urls/{id}/checks', function (Request $request, Response $response, array $args) use ($router) {
+$app->post('/urls/{id:\d+}/checks', function (Request $request, Response $response, array $args) {
     $urlId = (int) $args['id'];
     $url = $this->get('db')
         ->makeQuery('select', 'urls')
@@ -145,7 +178,7 @@ $app->post('/urls/{id}/checks', function (Request $request, Response $response, 
         не удалось подключиться';
         $this->get('flash')->addMessage('error', $flashMessage);
     }
-    $redirectRoute = $router->urlFor('urls.show', ['id' => (string) $urlId]);
+    $redirectRoute = $this->get('router')->urlFor('urls.show', ['id' => (string) $urlId]);
     return $response->withRedirect($redirectRoute, 302);
 })->setName('urls.checks.store');
 

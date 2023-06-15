@@ -89,11 +89,19 @@ class DBController
         return $this;
     }
 
-    public function orderBy(string $column, string $order)
+    public function orderBy(string $columns, string $order)
     {
-        $this->setQueryClause('orderBy', ['column' => $column, 'order' => $order]);
         $sql = $this->getQueryParam('sql');
-        $newSql = $sql . " ORDER BY {$column} {$order}";
+        $newSql = $sql . " ORDER BY {$columns} {$order}";
+        $this->setQueryParam('sql', $newSql);
+        return $this;
+    }
+
+    public function distinct(string $column)
+    {
+        $sql = $this->getQueryParam('sql');
+        $sqlFromTable = explode(' * ', $sql)[1];
+        $newSql = "SELECT" . " DISTINCT ON ({$column}) * " . $sqlFromTable;
         $this->setQueryParam('sql', $newSql);
         return $this;
     }
