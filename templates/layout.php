@@ -10,7 +10,7 @@
   </head>
 
   <body class="min-vh-100 d-flex flex-column">
-    <?php if (isset($activeLink)): ?>
+    <?php if (isset($activeLink)) : ?>
         <?= $this->fetch('/header.php', ['activeLink' => $activeLink]) ?>
     <?php endif; ?>
     <?php if (isset($flash)) : ?>
