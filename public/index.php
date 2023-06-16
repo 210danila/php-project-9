@@ -36,7 +36,7 @@ if (!is_null($container)) {
         return new \Slim\Flash\Messages();
     });
     $container->set('db', function () {
-        $pdo = Connection::get()->connect();
+        $pdo = Connection::get();
         return new DBController($pdo);
     });
 }

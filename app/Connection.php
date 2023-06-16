@@ -49,6 +49,6 @@ final class Connection
             static::$conn = new self();
         }
 
-        return static::$conn;
+        return static::$conn->connect();
     }
 }
