@@ -13,8 +13,7 @@ use Slim\Http\{Response, ServerRequest as Request};
 use GuzzleHttp\Exception\TransferException;
 use Slim\Factory\AppFactory;
 use DI\Container;
-use App\{Connection, DBController};
-use Slim\Views\PhpRenderer;
+
 use function App\Functions\{normalizeUrl, generateUrlCheck};
 
 session_start();
@@ -25,20 +24,8 @@ $app = AppFactory::create();
 
 $container = $app->getContainer();
 if (!is_null($container)) {
-    $container->set('router', $app->getRouteCollector()->getRouteParser());
-    $container->set('renderer', function ($container) {
-        $phpView = new PhpRenderer(__DIR__ . '/../templates');
-        $phpView->addAttribute('router', $container->get('router'));
-        $phpView->setLayout('layout.php');
-        return $phpView;
-    });
-    $container->set('flash', function () {
-        return new \Slim\Flash\Messages();
-    });
-    $container->set('db', function () {
-        $pdo = Connection::get();
-        return new DBController($pdo);
-    });
+    $dependencies = require 'dependencies.php';
+    $dependencies($container, $app);
 }
 
 $app->addErrorMiddleware(true, true, true);
