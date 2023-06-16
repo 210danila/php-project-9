@@ -10,7 +10,7 @@
   </head>
 
   <body class="min-vh-100 d-flex flex-column">
-    <?php if (isset($activeLink)) : ?>
+    <?php if (isset($activeLink) && isset($this)) : ?>
         <?= $this->fetch('/header.php', ['activeLink' => $activeLink]) ?>
     <?php endif; ?>
     <?php if (isset($flash)) : ?>
@@ -23,7 +23,9 @@
     <?php if (isset($content)) : ?>
         <?=$content?>
     <?php endif; ?>
-    <?= $this->fetch('/footer.php') ?>
+    <?php if (isset($this)) : ?>
+        <?= $this->fetch('/footer.php') ?>
+    <?php endif; ?>
   <
   </body>
 <html>
