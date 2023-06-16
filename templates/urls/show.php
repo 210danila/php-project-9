@@ -39,8 +39,8 @@
               <td><?= $check['id'] ?? "" ?></td>
               <td><?= $check['status_code'] ?? "" ?></td>
               <td><?= $check['h1'] ?? "" ?></td>
-              <td><?= mb_substr($check['title'], 0, 200) ?? "" ?></td>
-              <td><?= mb_substr($check['description'], 0, 200) ?? "" ?></td>
+              <td><?= isset($check['title']) ? mb_substr($check['title'], 0, 200) : "" ?></td>
+              <td><?= isset($check['description']) ? mb_substr($check['description'], 0, 200) : "" ?></td>
               <td><?= $check['created_at'] ?? "" ?></td>
             </tr>
           <?php endforeach; ?>
