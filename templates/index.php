@@ -10,17 +10,10 @@
           <form action="<?= $router->urlFor('urls.store') ?>" method="post" class="row" required="">
             <div class="col-8">
 
-              <?php if (empty($errors)) : ?>
-                <input type="text" name="url[name]" value="" class="form-control form-control-lg" placeholder="https://www.example.com">
-              <?php else : ?>
-                  <?php if (empty($urlName)) : ?>
-                  <input type="text" name="url[name]" value="" class="form-control form-control-lg is-invalid" placeholder="https://www.example.com">
-                  <?php else : ?>
-                  <input type="text" name="url[name]" value=<?= htmlspecialchars($urlName) ?> class="form-control form-control-lg is-invalid" placeholder="https://www.example.com">
-                  <?php endif; ?>
+              <input type="text" name="url[name]" value="<?= empty($urlName) ? "" : htmlspecialchars($urlName) ?>" class="form-control form-control-lg <?=empty($errors) ? "" : "is-invalid"?>" placeholder="https://www.example.com">
+              <?php if (!empty($errors)) : ?>
                 <div class="invalid-feedback"><?= $errors[0] ?></div>
               <?php endif; ?>
-
             </div>
             <div class="col-2">
               <input type="submit" class="btn btn-primary btn-lg ms-3 px-5 text-uppercase mx-3" value="Проверить">

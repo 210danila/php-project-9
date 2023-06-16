@@ -13,7 +13,7 @@
           <?php if (isset($urlsData) and isset($router)) : ?>
                 <?php foreach ($urlsData as $url) : ?>
                 <tr>
-                  <td><?= htmlspecialchars($url['name']) ?></td>
+                  <td><?= $url['id'] ?></td>
                   <td><a href="<?= $router->urlFor('urls.show', ['id' => $url['id']]) ?>"><?= htmlspecialchars($url['name']) ?></a></td>
                     <?php if (isset($url['check_status_code']) and isset($url['check_created_at'])) : ?>
                       <td><?= $url['check_created_at'] ?></td>
