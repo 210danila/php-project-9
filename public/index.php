@@ -24,20 +24,22 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 
 $container = $app->getContainer();
-$container->set('router', $app->getRouteCollector()->getRouteParser());
-$container->set('renderer', function ($container) {
-    $phpView = new PhpRenderer(__DIR__ . '/../templates');
-    $phpView->addAttribute('router', $container->get('router'));
-    $phpView->setLayout('layout.php');
-    return $phpView;
-});
-$container->set('flash', function () {
-    return new \Slim\Flash\Messages();
-});
-$container->set('db', function () {
-    $pdo = Connection::get()->connect();
-    return new DBController($pdo);
-});
+if (!is_null($container)) {
+    $container->set('router', $app->getRouteCollector()->getRouteParser());
+    $container->set('renderer', function ($container) {
+        $phpView = new PhpRenderer(__DIR__ . '/../templates');
+        $phpView->addAttribute('router', $container->get('router'));
+        $phpView->setLayout('layout.php');
+        return $phpView;
+    });
+    $container->set('flash', function () {
+        return new \Slim\Flash\Messages();
+    });
+    $container->set('db', function () {
+        $pdo = Connection::get()->connect();
+        return new DBController($pdo);
+    });
+}
 
 $app->addErrorMiddleware(true, true, true);
 
