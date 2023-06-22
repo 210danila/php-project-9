@@ -13,4 +13,4 @@ __сайт на микрофреймворке слим.__
 > make start
 
   __Ссылка на сайт:__
-php-project-9-production-60b8.up.railway.app
+https://php-project-9-production-bd74.up.railway.app/
