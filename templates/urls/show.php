@@ -1,4 +1,4 @@
-<?php if (isset($url) && isset($urlChecks)) : ?>
+<?php if (isset($url)) : ?>
   <main class="flex-grow-1">
     <div class="container-lg mt-3">
       <h1>Сайт: <?= htmlspecialchars($url['name']) ?></h1>
@@ -21,9 +21,11 @@
         </table>
       </div>
       <h2 class="mt-5 mb-3">Проверки</h2>
-      <form method="post" action="<?= $router->urlFor('urls.checks.store', ['id' => $url['id']]) ?>" style="margin-bottom: 1em;">
-        <input type="submit" class="btn btn-primary" value="Запустить проверку">
-      </form>
+      <?php if ($router): ?>
+          <form method="post" action="<?= $router->urlFor('urls.checks.store', ['id' => $url['id']]) ?>" style="margin-bottom: 1em;">
+            <input type="submit" class="btn btn-primary" value="Запустить проверку">
+          </form>
+      <?php endif; ?>
       <table class="table table-bordered table-hover" data-test="checks">
         <tbody>
           <tr>
@@ -34,16 +36,18 @@
             <th>description</th>
             <th>Дата создания</th>
           </tr>
-          <?php foreach ($urlChecks as $check) : ?>
-            <tr>
-              <td><?= $check['id'] ?? "" ?></td>
-              <td><?= $check['status_code'] ?? "" ?></td>
-              <td><?= $check['h1'] ?? "" ?></td>
-              <td><?= isset($check['title']) ? mb_substr($check['title'], 0, 200) : "" ?></td>
-              <td><?= isset($check['description']) ? mb_substr($check['description'], 0, 200) : "" ?></td>
-              <td><?= $check['created_at'] ?? "" ?></td>
-            </tr>
-          <?php endforeach; ?>
+          <?php if (isset($urlChecks)): ?>
+                <?php foreach ($urlChecks as $check) : ?>
+                <tr>
+                  <td><?= $check['id'] ?? "" ?></td>
+                  <td><?= $check['status_code'] ?? "" ?></td>
+                  <td><?= $check['h1'] ?? "" ?></td>
+                  <td><?= isset($check['title']) ? mb_substr($check['title'], 0, 200) : "" ?></td>
+                  <td><?= isset($check['description']) ? mb_substr($check['description'], 0, 200) : "" ?></td>
+                  <td><?= $check['created_at'] ?? "" ?></td>
+                </tr>
+                <?php endforeach; ?>
+        <?php endif; ?>
         </tbody>
       </table>
     </div>

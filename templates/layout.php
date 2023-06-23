@@ -17,7 +17,7 @@
   </head>
 
   <body class="min-vh-100 d-flex flex-column">
-    <?php if (isset($activeLink)) : ?>
+    <?php if (isset($activeLink) && isset($this)) : ?>
         <?= $this->fetch('/header.php', ['activeLink' => $activeLink]) ?>
     <?php endif; ?>
     <?php if (isset($flash)) : ?>
@@ -27,8 +27,8 @@
         <div class="alert alert-danger"><?= $flash['error'][0] ?></div>
         <?php endif; ?>
     <?php endif; ?>
-    <?=$content?>
-    <?= $this->fetch('/footer.php') ?>
+    <?= isset($content) ? $content : "" ?>
+    <?= isset($this) ? $this->fetch('/footer.php') : "" ?>
   <
   </body>
 <html>
