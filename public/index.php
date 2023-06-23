@@ -19,14 +19,10 @@ use function App\Functions\{normalizeUrl, generateUrlCheck};
 session_start();
 
 $container = new Container();
-AppFactory::setContainer($container);
-$app = AppFactory::create();
 
-$container = $app->getContainer();
-if (!is_null($container)) {
-    $dependencies = require 'dependencies.php';
-    $dependencies($container, $app);
-}
+$app = AppFactory::createFromContainer($container);
+$dependencies = require 'dependencies.php';
+$dependencies($container, $app);
 
 $app->addErrorMiddleware(true, true, true);
 
