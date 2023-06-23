@@ -14,9 +14,9 @@
                 <?php foreach ($urls as $url) : ?>
                 <tr>
                   <td><?= $url['id'] ?></td>
-                  <?php if (isset($router)) : ?>
-                      <td><a href="<?= $router->urlFor('urls.show', ['id' => $url['id']]) ?>"><?= htmlspecialchars($url['name']) ?></a></td>
-                  <?php endif; ?>
+                    <?php if (isset($router)) : ?>
+                        <td><a href="<?= $router->urlFor('urls.show', ['id' => $url['id']]) ?>"><?= htmlspecialchars($url['name']) ?></a></td>
+                    <?php endif; ?>
                   <td><?= $urlChecks[$url['id']]['created_at'] ?? "" ?></td>
                   <td><?= $urlChecks[$url['id']]['status_code'] ?? "" ?></td>
                 </tr>

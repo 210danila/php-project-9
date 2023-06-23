@@ -12,11 +12,11 @@ final class Connection
     {
         $databaseUrl = getenv('DATABASE_URL');
         if ($databaseUrl === false) {
-            throw new \Exception("Error reading database configuration file.");
+            throw new \Exception("Error reading DATABASE_URL: no such env variable.");
         }
         $parsedDatabaseUrl = parse_url($databaseUrl);
         if ($parsedDatabaseUrl === false) {
-            throw new \Exception("Error parsing databaseUrl.");
+            throw new \Exception("Error parsing DATABASE_URL.");
         }
 
         $conStr = sprintf(
