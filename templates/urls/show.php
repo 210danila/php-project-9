@@ -21,7 +21,7 @@
         </table>
       </div>
       <h2 class="mt-5 mb-3">Проверки</h2>
-      <?php if ($router) : ?>
+      <?php if (isset($router)) : ?>
           <form method="post" action="<?= $router->urlFor('urls.checks.store', ['id' => $url['id']]) ?>" style="margin-bottom: 1em;">
             <input type="submit" class="btn btn-primary" value="Запустить проверку">
           </form>

@@ -27,7 +27,7 @@
         <div class="alert alert-danger"><?= $flash['error'][0] ?></div>
         <?php endif; ?>
     <?php endif; ?>
-    <?= isset($content) ? $content : "" ?>
+    <?= $content ?>
     <?= isset($this) ? $this->fetch('/footer.php') : "" ?>
   <
   </body>

@@ -16,6 +16,8 @@ use DI\Container;
 
 use function App\Functions\{normalizeUrl, generateUrlCheck};
 
+const INCORRECT_URL = 'Некорректный URL';
+
 session_start();
 
 $container = new Container();
@@ -81,10 +83,11 @@ $app->post('/urls', function (Request $request, Response $response) {
     $normalizedUrlName = normalizeUrl($urlName);
 
     $validator = new \Valitron\Validator(['name' => $normalizedUrlName]);
-    $validator->rule('required', 'name')
-        ->rule('lengthMax', 'name', 255)
-        ->rule('url', 'name');
-    $errors =  $validator->validate() ? [] : ['Некорректный URL'];
+    $validator->rule('required', 'name')->message(INCORRECT_URL);
+    $validator->rule('lengthMax', 'name', 255)->message(INCORRECT_URL);
+    $validator->rule('url', 'name')->message(INCORRECT_URL);
+    $validator->validate();
+    $errors = $validator->errors()['name'];
     if (empty($normalizedUrlName)) {
         $errors = ['URL не должен быть пустым'];
     }
