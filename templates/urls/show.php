@@ -21,7 +21,7 @@
         </table>
       </div>
       <h2 class="mt-5 mb-3">Проверки</h2>
-      <?php if ($router): ?>
+      <?php if ($router) : ?>
           <form method="post" action="<?= $router->urlFor('urls.checks.store', ['id' => $url['id']]) ?>" style="margin-bottom: 1em;">
             <input type="submit" class="btn btn-primary" value="Запустить проверку">
           </form>
@@ -36,7 +36,7 @@
             <th>description</th>
             <th>Дата создания</th>
           </tr>
-          <?php if (isset($urlChecks)): ?>
+          <?php if (isset($urlChecks)) : ?>
                 <?php foreach ($urlChecks as $check) : ?>
                 <tr>
                   <td><?= $check['id'] ?? "" ?></td>
@@ -47,7 +47,7 @@
                   <td><?= $check['created_at'] ?? "" ?></td>
                 </tr>
                 <?php endforeach; ?>
-        <?php endif; ?>
+          <?php endif; ?>
         </tbody>
       </table>
     </div>

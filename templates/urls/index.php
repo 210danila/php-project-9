@@ -10,13 +10,13 @@
             <th>Последняя проверка</th>
             <th>Код ответа</th>
           </tr>
-          <?php if (isset($urlsData)) : ?>
-                <?php foreach ($urlsData as $url) : ?>
+          <?php if (isset($urls) && isset($urlChecks)) : ?>
+                <?php foreach ($urls as $url) : ?>
                 <tr>
                   <td><?= $url['id'] ?></td>
                   <td><a href="<?= $router->urlFor('urls.show', ['id' => $url['id']]) ?>"><?= htmlspecialchars($url['name']) ?></a></td>
-                  <td><?= $url['check_created_at'] ?? "" ?></td>
-                  <td><?= $url['check_status_code'] ?? "" ?></td>
+                  <td><?= $urlChecks[$url['id']]['status_code'] ?? "" ?></td>
+                  <td><?= $urlChecks[$url['id']]['created_at'] ?? "" ?></td>
                 </tr>
                 <?php endforeach; ?>
           <?php endif; ?>

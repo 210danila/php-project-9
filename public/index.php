@@ -45,21 +45,11 @@ $app->get('/urls', function (Request $request, Response $response) {
         ->distinct('url_id')
         ->orderBy('url_id, created_at', 'DESC')
         ->exec();
-    $checkSatusCodes = collect($urlChecks)->pluck('status_code', 'url_id')->toArray();
-    $checkTimestamps = collect($urlChecks)->pluck('created_at', 'url_id')->toArray();
-
-    $urlsData = array_map(function ($url) use ($checkSatusCodes, $checkTimestamps) {
-        $url_id = $url['id'];
-        return [
-            'name' => $url['name'],
-            'id' => $url_id,
-            'check_status_code' => $checkSatusCodes[$url_id] ?? '',
-            'check_created_at' => $checkTimestamps[$url_id] ?? ''
-        ];
-    }, $urls);
+    $urlChecks = collect($urlChecks)->keyBy('url_id')->toArray();
 
     $params = [
-        'urlsData' => $urlsData,
+        'urls' => $urls,
+        'urlChecks' => $urlChecks,
         'activeLink' => 'Сайты'
     ];
     return $this->get('renderer')->render($response, "urls/index.php", $params);
