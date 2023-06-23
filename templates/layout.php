@@ -1,3 +1,10 @@
+<?php
+/**
+*
+* @var string $content
+*
+*/
+?>
 <!DOCTYPE html>
 <html lang="ru">
   <head>
@@ -10,7 +17,7 @@
   </head>
 
   <body class="min-vh-100 d-flex flex-column">
-    <?php if (isset($activeLink) && isset($this)) : ?>
+    <?php if (isset($activeLink)) : ?>
         <?= $this->fetch('/header.php', ['activeLink' => $activeLink]) ?>
     <?php endif; ?>
     <?php if (isset($flash)) : ?>
@@ -20,12 +27,8 @@
         <div class="alert alert-danger"><?= $flash['error'][0] ?></div>
         <?php endif; ?>
     <?php endif; ?>
-    <?php if (isset($content)) : ?>
-        <?=$content?>
-    <?php endif; ?>
-    <?php if (isset($this)) : ?>
-        <?= $this->fetch('/footer.php') ?>
-    <?php endif; ?>
+    <?=$content?>
+    <?= $this->fetch('/footer.php') ?>
   <
   </body>
 <html>

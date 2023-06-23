@@ -10,18 +10,13 @@
             <th>Последняя проверка</th>
             <th>Код ответа</th>
           </tr>
-          <?php if (isset($urlsData) and isset($router)) : ?>
+          <?php if (isset($urlsData)) : ?>
                 <?php foreach ($urlsData as $url) : ?>
                 <tr>
                   <td><?= $url['id'] ?></td>
                   <td><a href="<?= $router->urlFor('urls.show', ['id' => $url['id']]) ?>"><?= htmlspecialchars($url['name']) ?></a></td>
-                    <?php if (isset($url['check_status_code']) and isset($url['check_created_at'])) : ?>
-                      <td><?= $url['check_created_at'] ?></td>
-                      <td><?= $url['check_status_code'] ?></td>
-                    <?php else : ?>
-                    <td></td>
-                    <td></td>
-                    <?php endif; ?>
+                  <td><?= $url['check_created_at'] ?? "" ?></td>
+                  <td><?= $url['check_status_code'] ?? "" ?></td>
                 </tr>
                 <?php endforeach; ?>
           <?php endif; ?>

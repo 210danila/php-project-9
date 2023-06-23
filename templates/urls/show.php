@@ -1,4 +1,4 @@
-<?php if (isset($url) && isset($router) && isset($urlChecks)) : ?>
+<?php if (isset($url) && isset($urlChecks)) : ?>
   <main class="flex-grow-1">
     <div class="container-lg mt-3">
       <h1>Сайт: <?= htmlspecialchars($url['name']) ?></h1>

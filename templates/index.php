@@ -1,3 +1,11 @@
+<?php
+/**
+*
+* @var string $content
+*
+*/
+?>
+
 <main class="flex-grow-1">
   <div class="container-lg mt-3">
     <h1></h1>
