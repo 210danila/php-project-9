@@ -13,8 +13,11 @@ use Slim\Http\{Response, ServerRequest as Request};
 use GuzzleHttp\Exception\TransferException;
 use Slim\Factory\AppFactory;
 use DI\Container;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use DiDom\Document;
 
-use function App\Functions\{normalizeUrl, generateUrlCheck};
+use function App\Functions\{normalizeUrl};
 
 const INCORRECT_URL = 'Некорректный URL';
 
@@ -132,7 +135,30 @@ $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $respon
         ->exec(true);
 
     try {
-        $values = generateUrlCheck($url);
+        $client = new Client();
+        try {
+            $urlResponse = $client->request('GET', $url['name']);
+        } catch (ClientException $e) {
+            $urlResponse = $e->getResponse();
+        }
+        $statusCode = $urlResponse->getStatusCode();
+        $urlId = $url['id'];
+
+        $body = (string) $urlResponse->getBody();
+        $document = new Document($body);
+        $h1 = $document->first('h1::text()');
+        $title = $document->first('title::text()');
+        $description = $document->first('meta[name=description][content]::attr(content)');
+
+        $formatContent = fn ($text) => trim($text);
+        $values = [
+            'url_id' => $urlId,
+            'status_code' => $statusCode,
+            'h1' => optional($h1, $formatContent),
+            'title' => optional($title, $formatContent),
+            'description' => optional($description, $formatContent)
+        ];
+
         $this->get('db')
             ->makeQuery('insert', 'url_checks')
             ->values($values)
