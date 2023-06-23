@@ -108,12 +108,13 @@ $app->post('/urls', function (Request $request, Response $response) {
         return $response->withRedirect($redirectRoute, 302);
     }
 
-    $errors = $validator->errors()['name'];
+    $errors = $validator->errors();
+    $nameErrors = is_array($errors) ? $errors['name'] : [];
     if (empty($normalizedUrlName)) {
-        $errors = ['URL не должен быть пустым'];
+        $nameErrors = ['URL не должен быть пустым'];
     }
     $params = [
-        'errors' => $errors,
+        'errors' => $nameErrors,
         'urlName' => $normalizedUrlName,
         'activeLink' => 'Сайты'
     ];

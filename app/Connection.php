@@ -6,8 +6,6 @@ use Illuminate\Support\Arr;
 
 final class Connection
 {
-    private static ?Connection $conn = null;
-
     public function connect()
     {
         $databaseUrl = getenv('DATABASE_URL');
@@ -30,25 +28,6 @@ final class Connection
 
         $pdo = new \PDO($conStr);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-        $migrationsFileContents = file_get_contents('../database.sql');
-        if ($migrationsFileContents === false) {
-            throw new \Exception('No such file database.sql');
-        }
-        $dbMigrations = explode("\n\n", $migrationsFileContents);
-        foreach ($dbMigrations as $sql) {
-            $pdo->exec($sql);
-        }
-
         return $pdo;
-    }
-
-    public static function get()
-    {
-        if (null === static::$conn) {
-            static::$conn = new self();
-        }
-
-        return static::$conn->connect();
     }
 }

@@ -17,7 +17,8 @@ return function (Container $container, Slim\App $app) {
         return $phpView;
     });
     $container->set('db', function () {
-        $pdo = Connection::get();
+        $conn = new Connection();
+        $pdo = $conn->connect();
         return new DBController($pdo);
     });
 };
