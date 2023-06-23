@@ -15,8 +15,8 @@
                 <tr>
                   <td><?= $url['id'] ?></td>
                   <td><a href="<?= $router->urlFor('urls.show', ['id' => $url['id']]) ?>"><?= htmlspecialchars($url['name']) ?></a></td>
-                  <td><?= $urlChecks[$url['id']]['status_code'] ?? "" ?></td>
                   <td><?= $urlChecks[$url['id']]['created_at'] ?? "" ?></td>
+                  <td><?= $urlChecks[$url['id']]['status_code'] ?? "" ?></td>
                 </tr>
                 <?php endforeach; ?>
           <?php endif; ?>

@@ -67,12 +67,10 @@ $app->get('/urls/{id:\d+}', function (Request $request, Response $response, arra
         ->where('url_id', $urlId)
         ->orderBy('id', 'DESC')
         ->exec();
-    $flashMessages = $this->get('flash')->getMessages();
 
     $params = [
         'url' => $url,
         'urlChecks' => $urlChecks,
-        'flash' => $flashMessages,
         'activeLink' => ''
     ];
     return $this->get('renderer')->render($response, "urls/show.php", $params);
