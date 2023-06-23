@@ -19,7 +19,7 @@ function normalizeUrl(string $urlName)
     }
     $scheme = Arr::get($parsedUrl, 'scheme');
     $host = Arr::get($parsedUrl, 'host');
-    if (empty($scheme) and empty($host) and $urlName !== '://') {
+    if ((empty($scheme) or empty($host)) and $urlName !== '://') {
         return $urlName;
     }
     return $scheme . '://' . $host;

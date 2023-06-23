@@ -86,13 +86,8 @@ $app->post('/urls', function (Request $request, Response $response) {
     $validator->rule('required', 'name')->message(INCORRECT_URL);
     $validator->rule('lengthMax', 'name', 255)->message(INCORRECT_URL);
     $validator->rule('url', 'name')->message(INCORRECT_URL);
-    $validator->validate();
-    $errors = $validator->errors()['name'];
-    if (empty($normalizedUrlName)) {
-        $errors = ['URL не должен быть пустым'];
-    }
 
-    if (empty($errors)) {
+    if ($validator->validate()) {
         $sameUrl = $this->get('db')
             ->makeQuery('select', 'urls')
             ->where('name', $normalizedUrlName)
@@ -113,6 +108,10 @@ $app->post('/urls', function (Request $request, Response $response) {
         return $response->withRedirect($redirectRoute, 302);
     }
 
+    $errors = $validator->errors()['name'];
+    if (empty($normalizedUrlName)) {
+        $errors = ['URL не должен быть пустым'];
+    }
     $params = [
         'errors' => $errors,
         'urlName' => $normalizedUrlName,
