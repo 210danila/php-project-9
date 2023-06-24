@@ -37,7 +37,7 @@ $app->get('/', function (Request $request, Response $response) {
         'urlName' => '',
         'activeLink' => 'Главная'
     ];
-    return $this->get('renderer')->render($response, "index.php", $params);
+    return $this->get('renderer')->render($response, "index.phtml", $params);
 })->setName('root');
 
 $app->get('/urls', function (Request $request, Response $response) {
@@ -123,7 +123,7 @@ $app->post('/urls', function (Request $request, Response $response) {
     ];
     return $this
         ->get('renderer')
-        ->render($response, "index.php", $params)
+        ->render($response, "index.phtml", $params)
         ->withStatus(422);
 })->setName('urls.store');
 
