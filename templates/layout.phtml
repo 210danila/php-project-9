@@ -1,10 +1,3 @@
-<?php
-/**
-*
-* @var string $content
-*
-*/
-?>
 <!DOCTYPE html>
 <html lang="ru">
   <head>
@@ -17,9 +10,7 @@
   </head>
 
   <body class="min-vh-100 d-flex flex-column">
-    <?php if (isset($activeLink) && isset($this)) : ?>
-        <?= $this->fetch('/header.php', ['activeLink' => $activeLink]) ?>
-    <?php endif; ?>
+    <?= $this->fetch('/header.phtml', ['activeLink' => $activeLink]) ?>
     <?php if (isset($flash)) : ?>
         <?php if (array_key_exists('success', $flash)) : ?>
         <div class="alert alert-success"><?= $flash['success'][0] ?></div>
@@ -28,7 +19,7 @@
         <?php endif; ?>
     <?php endif; ?>
     <?= $content ?>
-    <?= isset($this) ? $this->fetch('/footer.php') : "" ?>
+    <?= isset($this) ? $this->fetch('/footer.phtml') : "" ?>
   <
   </body>
 <html>

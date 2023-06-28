@@ -1,17 +1,18 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/210danila/php-project-9/workflows/hexlet-check/badge.svg)](https://github.com/210danila/php-project-9/actions)
 
-*3ий проект Хекслет
+* 3ий проект Хекслет
+
 __Сайт на микрофреймворке слим.__
 
-    __Установка:__
-1) Установка зависимостей
+  __Установка:__
+1) Устанавливаем зависимости
 > make install
-2) Установите переменную окружения DATABASE_URL С URL вашей базы данных формата
+2) Устанавливаем переменную окружения DATABASE_URL
 > export DATABASE_URL=postgresql://janedoe:mypassword@localhost:5432/mydb
-3) Примените миграции:
+3) Выполняем миграции:
 > make migrate
-4) Запустите приложение
+4) Запускаем приложение:
 > make start
 
   __Ссылка на сайт:__

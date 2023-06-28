@@ -1,6 +1,6 @@
 <?php
 
-use App\{Connection, DBController};
+use App\{Connection};
 use Slim\Views\PhpRenderer;
 use DI\Container;
 
@@ -13,12 +13,11 @@ return function (Container $container, Slim\App $app) {
         $phpView = new PhpRenderer(__DIR__ . '/../templates');
         $phpView->addAttribute('router', $container->get('router'));
         $phpView->addAttribute('flash', $container->get('flash')->getMessages());
-        $phpView->setLayout('layout.php');
+        $phpView->setLayout('layout.phtml');
         return $phpView;
     });
-    $container->set('db', function () {
+    $container->set('pdo', function () {
         $conn = new Connection();
-        $pdo = $conn->connect();
-        return new DBController($pdo);
+        return $conn->connect();
     });
 };

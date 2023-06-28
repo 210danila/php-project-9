@@ -13,6 +13,7 @@ use Slim\Http\{Response, ServerRequest as Request};
 use GuzzleHttp\Exception\TransferException;
 use Slim\Factory\AppFactory;
 use DI\Container;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use DiDom\Document;
@@ -41,15 +42,14 @@ $app->get('/', function (Request $request, Response $response) {
 })->setName('root');
 
 $app->get('/urls', function (Request $request, Response $response) {
-    $urls = $this->get('db')
-        ->makeQuery('select', 'urls')
-        ->orderBy('id', 'DESC')
-        ->exec();
-    $urlChecks = $this->get('db')
-        ->makeQuery('select', 'url_checks')
-        ->distinct('url_id')
-        ->orderBy('url_id, created_at', 'DESC')
-        ->exec();
+    $sql = "SELECT * FROM urls ORDER BY id DESC;";
+    $stmt = $this->get('pdo')->prepare($sql);
+    $stmt->execute();
+    $urls = $stmt->fetchAll();
+    $sql = "SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id, created_at DESC;";
+    $stmt = $this->get('pdo')->prepare($sql);
+    $stmt->execute();
+    $urlChecks = $stmt->fetchAll();
     $urlChecks = collect($urlChecks)->keyBy('url_id')->toArray();
 
     $params = [
@@ -57,28 +57,29 @@ $app->get('/urls', function (Request $request, Response $response) {
         'urlChecks' => $urlChecks,
         'activeLink' => 'Сайты'
     ];
-    return $this->get('renderer')->render($response, "urls/index.php", $params);
+    return $this->get('renderer')->render($response, "urls/index.phtml", $params);
 })->setName('urls.index');
 
 $app->get('/urls/{id:\d+}', function (Request $request, Response $response, array $args) {
     $urlId = (int) $args['id'];
 
-    $url = $this->get('db')
-        ->makeQuery('select', 'urls')
-        ->where('id', $urlId)
-        ->exec(true);
-    $urlChecks = $this->get('db')
-        ->makeQuery('select', 'url_checks')
-        ->where('url_id', $urlId)
-        ->orderBy('id', 'DESC')
-        ->exec();
+    $sql = "SELECT * FROM urls WHERE id=:url_id";
+    $stmt = $this->get('pdo')->prepare($sql);
+    $stmt->bindValue(':url_id', $urlId);
+    $stmt->execute();
+    $url = $stmt->fetch();
+    $sql = "SELECT * FROM url_checks WHERE url_id=:url_id ORDER BY id DESC";
+    $stmt = $this->get('pdo')->prepare($sql);
+    $stmt->bindValue(':url_id', $urlId);
+    $stmt->execute();
+    $urlChecks = $stmt->fetchAll();
 
     $params = [
         'url' => $url,
         'urlChecks' => $urlChecks,
         'activeLink' => ''
     ];
-    return $this->get('renderer')->render($response, "urls/show.php", $params);
+    return $this->get('renderer')->render($response, "urls/show.phtml", $params);
 })->setName('urls.show');
 
 $app->post('/urls', function (Request $request, Response $response) {
@@ -91,19 +92,22 @@ $app->post('/urls', function (Request $request, Response $response) {
     $validator->rule('url', 'name')->message(INCORRECT_URL);
 
     if ($validator->validate()) {
-        $sameUrl = $this->get('db')
-            ->makeQuery('select', 'urls')
-            ->where('name', $normalizedUrlName)
-            ->exec(true);
+        $sql = "SELECT * FROM urls WHERE name=:name";
+        $stmt = $this->get('pdo')->prepare($sql);
+        $stmt->bindValue(':name', $normalizedUrlName);
+        $stmt->execute();
+        $sameUrl = $stmt->fetch();
 
         if (!empty($sameUrl)) {
             $this->get('flash')->addMessage('success', 'Страница уже существует');
             $urlId = $sameUrl['id'];
         } else {
-            $urlId = $this->get('db')
-                ->makeQuery('insert', 'urls')
-                ->values(['name' => $normalizedUrlName])
-                ->exec();
+            $sql = "INSERT INTO urls (name, created_at) VALUES (:name, :created_at)";
+            $stmt = $this->get('pdo')->prepare($sql);
+            $stmt->bindValue(':name', $normalizedUrlName);
+            $stmt->bindValue(':created_at', Carbon::now());
+            $stmt->execute();
+            $urlId = $this->get('pdo')->lastInsertId();
             $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
         }
 
@@ -129,10 +133,11 @@ $app->post('/urls', function (Request $request, Response $response) {
 
 $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $response, array $args) {
     $urlId = (int) $args['id'];
-    $url = $this->get('db')
-        ->makeQuery('select', 'urls')
-        ->where('id', $urlId)
-        ->exec(true);
+    $sql = "SELECT * FROM urls WHERE id=:url_id";
+    $stmt = $this->get('pdo')->prepare($sql);
+    $stmt->bindValue(':url_id', $urlId);
+    $stmt->execute();
+    $url = $stmt->fetch();
 
     try {
         $client = new Client();
@@ -152,17 +157,22 @@ $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $respon
 
         $formatContent = fn ($text) => trim($text);
         $values = [
-            'url_id' => $urlId,
-            'status_code' => $statusCode,
-            'h1' => optional($h1, $formatContent),
-            'title' => optional($title, $formatContent),
-            'description' => optional($description, $formatContent)
+            ':url_id' => $urlId,
+            ':status_code' => $statusCode,
+            ':h1' => optional($h1, $formatContent),
+            ':title' => optional($title, $formatContent),
+            ':description' => optional($description, $formatContent),
+            ':created_at' => Carbon::now()
         ];
 
-        $this->get('db')
-            ->makeQuery('insert', 'url_checks')
-            ->values($values)
-            ->exec();
+        $sql = "INSERT INTO url_checks
+                (url_id, status_code, h1, title, description, created_at)
+                VALUES (:url_id, :status_code, :h1, :title, :description, :created_at)";
+        $stmt = $this->get('pdo')->prepare($sql);
+        foreach ($values as $name => $value) {
+            $stmt->bindValue($name, $value);
+        }
+        $stmt->execute();
         $flashMessage = 'Страница успешно проверена';
         $this->get('flash')->addMessage('success', $flashMessage);
     } catch (TransferException $e) {
