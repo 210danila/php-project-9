@@ -148,6 +148,8 @@ $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $respon
         $flashMessage = 'Произошла ошибка при проверке,
         не удалось подключиться';
         $this->get('flash')->addMessage('error', $flashMessage);
+        $redirectRoute = $this->get('router')->urlFor('urls.show', ['id' => (string) $urlId]);
+        return $response->withRedirect($redirectRoute, 302);
     }
     $statusCode = $urlResponse->getStatusCode();
     $urlId = $url['id'];
