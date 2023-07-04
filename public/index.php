@@ -17,10 +17,13 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use DiDom\Document;
+use Illuminate\Support\Str;
+
 
 use function App\Functions\{normalizeUrl};
 
-const INCORRECT_URL = 'Некорректный URL';
+const INCORRECT_URL_ERROR = 'Некорректный URL';
+const EMPTY_URL_ERROR = 'URL не должен быть пустым';
 
 session_start();
 
@@ -84,51 +87,48 @@ $app->get('/urls/{id:\d+}', function (Request $request, Response $response, arra
 
 $app->post('/urls', function (Request $request, Response $response) {
     $urlName = $request->getParsedBodyParam('url')['name'];
+
+    $validator = new \Valitron\Validator(['name' => $urlName]);
+    $validator->rule('required', 'name')->message(EMPTY_URL_ERROR);
+    $validator->rule('lengthMax', 'name', 255)->message(INCORRECT_URL_ERROR);
+    $validator->rule('url', 'name')->message(INCORRECT_URL_ERROR);
+
     $normalizedUrlName = normalizeUrl($urlName);
 
-    $validator = new \Valitron\Validator(['name' => $normalizedUrlName]);
-    $validator->rule('required', 'name')->message(INCORRECT_URL);
-    $validator->rule('lengthMax', 'name', 255)->message(INCORRECT_URL);
-    $validator->rule('url', 'name')->message(INCORRECT_URL);
+    if (!$validator->validate()) {
+        $errors = $validator->errors();
+        $params = [
+            'errors' => $errors,
+            'urlName' => $urlName,
+            'activeLink' => 'Сайты'
+        ];
+        return $this
+            ->get('renderer')
+            ->render($response, "index.phtml", $params)
+            ->withStatus(422);
+    }
 
-    if ($validator->validate()) {
-        $sql = "SELECT * FROM urls WHERE name=:name";
+    $sql = "SELECT * FROM urls WHERE name=:name";
+    $stmt = $this->get('pdo')->prepare($sql);
+    $stmt->bindValue(':name', $normalizedUrlName);
+    $stmt->execute();
+    $sameUrl = $stmt->fetch();
+
+    if (!empty($sameUrl)) {
+        $this->get('flash')->addMessage('success', 'Страница уже существует');
+        $urlId = $sameUrl['id'];
+    } else {
+        $sql = "INSERT INTO urls (name, created_at) VALUES (:name, :created_at)";
         $stmt = $this->get('pdo')->prepare($sql);
         $stmt->bindValue(':name', $normalizedUrlName);
+        $stmt->bindValue(':created_at', Carbon::now());
         $stmt->execute();
-        $sameUrl = $stmt->fetch();
-
-        if (!empty($sameUrl)) {
-            $this->get('flash')->addMessage('success', 'Страница уже существует');
-            $urlId = $sameUrl['id'];
-        } else {
-            $sql = "INSERT INTO urls (name, created_at) VALUES (:name, :created_at)";
-            $stmt = $this->get('pdo')->prepare($sql);
-            $stmt->bindValue(':name', $normalizedUrlName);
-            $stmt->bindValue(':created_at', Carbon::now());
-            $stmt->execute();
-            $urlId = $this->get('pdo')->lastInsertId();
-            $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
-        }
-
-        $redirectRoute = $this->get('router')->urlFor('urls.show', ['id' => (string) $urlId]);
-        return $response->withRedirect($redirectRoute, 302);
+        $urlId = $this->get('pdo')->lastInsertId();
+        $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
     }
 
-    $errors = $validator->errors();
-    $nameErrors = is_array($errors) ? $errors['name'] : [];
-    if (empty($normalizedUrlName)) {
-        $nameErrors = ['URL не должен быть пустым'];
-    }
-    $params = [
-        'errors' => $nameErrors,
-        'urlName' => $normalizedUrlName,
-        'activeLink' => 'Сайты'
-    ];
-    return $this
-        ->get('renderer')
-        ->render($response, "index.phtml", $params)
-        ->withStatus(422);
+    $redirectRoute = $this->get('router')->urlFor('urls.show', ['id' => (string) $urlId]);
+    return $response->withRedirect($redirectRoute, 302);
 })->setName('urls.store');
 
 $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $response, array $args) {
@@ -139,47 +139,47 @@ $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $respon
     $stmt->execute();
     $url = $stmt->fetch();
 
+    $client = new Client();
     try {
-        $client = new Client();
-        try {
-            $urlResponse = $client->request('GET', $url['name']);
-        } catch (ClientException $e) {
-            $urlResponse = $e->getResponse();
-        }
-        $statusCode = $urlResponse->getStatusCode();
-        $urlId = $url['id'];
-
-        $body = (string) $urlResponse->getBody();
-        $document = new Document($body);
-        $h1 = $document->first('h1::text()');
-        $title = $document->first('title::text()');
-        $description = $document->first('meta[name=description][content]::attr(content)');
-
-        $formatContent = fn ($text) => trim($text);
-        $values = [
-            ':url_id' => $urlId,
-            ':status_code' => $statusCode,
-            ':h1' => optional($h1, $formatContent),
-            ':title' => optional($title, $formatContent),
-            ':description' => optional($description, $formatContent),
-            ':created_at' => Carbon::now()
-        ];
-
-        $sql = "INSERT INTO url_checks
-                (url_id, status_code, h1, title, description, created_at)
-                VALUES (:url_id, :status_code, :h1, :title, :description, :created_at)";
-        $stmt = $this->get('pdo')->prepare($sql);
-        foreach ($values as $name => $value) {
-            $stmt->bindValue($name, $value);
-        }
-        $stmt->execute();
-        $flashMessage = 'Страница успешно проверена';
-        $this->get('flash')->addMessage('success', $flashMessage);
+        $urlResponse = $client->request('GET', $url['name']);
+    } catch (ClientException $e) {
+        $urlResponse = $e->getResponse();
     } catch (TransferException $e) {
         $flashMessage = 'Произошла ошибка при проверке,
         не удалось подключиться';
         $this->get('flash')->addMessage('error', $flashMessage);
     }
+    $statusCode = $urlResponse->getStatusCode();
+    $urlId = $url['id'];
+
+    $body = (string) $urlResponse->getBody();
+    $document = new Document($body);
+    $h1 = $document->first('h1::text()');
+    $title = $document->first('title::text()');
+    $description = $document->first('meta[name=description][content]::attr(content)');
+
+    $formatContent = fn ($text) => trim($text);
+    $values = [
+        ':url_id' => $urlId,
+        ':status_code' => $statusCode,
+        ':h1' => optional($h1, $formatContent),
+        ':title' => optional($title, $formatContent),
+        ':description' => optional($description, $formatContent),
+        ':created_at' => Carbon::now()
+    ];
+
+    $sql = "INSERT INTO url_checks
+            (url_id, status_code, h1, title, description, created_at)
+            VALUES (:url_id, :status_code, :h1, :title, :description, :created_at)";
+    $stmt = $this->get('pdo')->prepare($sql);
+    foreach ($values as $name => $value) {
+        $stmt->bindValue($name, $value);
+    }
+    $stmt->execute();
+
+    $flashMessage = 'Страница успешно проверена';
+    $this->get('flash')->addMessage('success', $flashMessage);
+
     $redirectRoute = $this->get('router')->urlFor('urls.show', ['id' => (string) $urlId]);
     return $response->withRedirect($redirectRoute, 302);
 })->setName('urls.checks.store');
