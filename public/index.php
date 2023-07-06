@@ -17,13 +17,8 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use DiDom\Document;
-use Illuminate\Support\Str;
 
-
-use function App\Functions\{normalizeUrl};
-
-const INCORRECT_URL_ERROR = 'Некорректный URL';
-const EMPTY_URL_ERROR = 'URL не должен быть пустым';
+use function App\Functions\normalizeUrl;
 
 session_start();
 
@@ -45,19 +40,20 @@ $app->get('/', function (Request $request, Response $response) {
 })->setName('root');
 
 $app->get('/urls', function (Request $request, Response $response) {
-    $sql = "SELECT * FROM urls ORDER BY id DESC;";
-    $stmt = $this->get('pdo')->prepare($sql);
-    $stmt->execute();
-    $urls = $stmt->fetchAll();
-    $sql = "SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id, created_at DESC;";
-    $stmt = $this->get('pdo')->prepare($sql);
-    $stmt->execute();
-    $urlChecks = $stmt->fetchAll();
-    $urlChecks = collect($urlChecks)->keyBy('url_id')->toArray();
+    $sql1 = "SELECT * FROM urls ORDER BY id DESC;";
+    $stmt1 = $this->get('pdo')->prepare($sql1);
+    $stmt1->execute();
+    $urls = $stmt1->fetchAll();
+
+    $sql2 = "SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id, created_at DESC;";
+    $stmt2 = $this->get('pdo')->prepare($sql2);
+    $stmt2->execute();
+    $urlChecks = $stmt2->fetchAll();
+    $urlChecksByUrlId = collect($urlChecks)->keyBy('url_id')->toArray();
 
     $params = [
         'urls' => $urls,
-        'urlChecks' => $urlChecks,
+        'urlChecks' => $urlChecksByUrlId,
         'activeLink' => 'Сайты'
     ];
     return $this->get('renderer')->render($response, "urls/index.phtml", $params);
@@ -66,16 +62,17 @@ $app->get('/urls', function (Request $request, Response $response) {
 $app->get('/urls/{id:\d+}', function (Request $request, Response $response, array $args) {
     $urlId = (int) $args['id'];
 
-    $sql = "SELECT * FROM urls WHERE id=:url_id";
-    $stmt = $this->get('pdo')->prepare($sql);
-    $stmt->bindValue(':url_id', $urlId);
-    $stmt->execute();
-    $url = $stmt->fetch();
-    $sql = "SELECT * FROM url_checks WHERE url_id=:url_id ORDER BY id DESC";
-    $stmt = $this->get('pdo')->prepare($sql);
-    $stmt->bindValue(':url_id', $urlId);
-    $stmt->execute();
-    $urlChecks = $stmt->fetchAll();
+    $sql1 = "SELECT * FROM urls WHERE id=:url_id";
+    $stmt1 = $this->get('pdo')->prepare($sql1);
+    $stmt1->bindValue(':url_id', $urlId);
+    $stmt1->execute();
+    $url = $stmt1->fetch();
+
+    $sql2 = "SELECT * FROM url_checks WHERE url_id=:url_id ORDER BY id DESC";
+    $stmt2 = $this->get('pdo')->prepare($sql2);
+    $stmt2->bindValue(':url_id', $urlId);
+    $stmt2->execute();
+    $urlChecks = $stmt2->fetchAll();
 
     $params = [
         'url' => $url,
@@ -89,9 +86,9 @@ $app->post('/urls', function (Request $request, Response $response) {
     $urlName = $request->getParsedBodyParam('url')['name'];
 
     $validator = new \Valitron\Validator(['name' => $urlName]);
-    $validator->rule('required', 'name')->message(EMPTY_URL_ERROR);
-    $validator->rule('lengthMax', 'name', 255)->message(INCORRECT_URL_ERROR);
-    $validator->rule('url', 'name')->message(INCORRECT_URL_ERROR);
+    $validator->rule('required', 'name')->message('URL не должен быть пустым');
+    $validator->rule('lengthMax', 'name', 255)->message('Некорректный URL');
+    $validator->rule('url', 'name')->message('Некорректный URL');
 
     $normalizedUrlName = normalizeUrl($urlName);
 
@@ -108,21 +105,21 @@ $app->post('/urls', function (Request $request, Response $response) {
             ->withStatus(422);
     }
 
-    $sql = "SELECT * FROM urls WHERE name=:name";
-    $stmt = $this->get('pdo')->prepare($sql);
-    $stmt->bindValue(':name', $normalizedUrlName);
-    $stmt->execute();
-    $sameUrl = $stmt->fetch();
+    $sql1 = "SELECT * FROM urls WHERE name=:name";
+    $stmt1 = $this->get('pdo')->prepare($sql1);
+    $stmt1->bindValue(':name', $normalizedUrlName);
+    $stmt1->execute();
+    $sameUrl = $stmt1->fetch();
 
     if (!empty($sameUrl)) {
         $this->get('flash')->addMessage('success', 'Страница уже существует');
         $urlId = $sameUrl['id'];
     } else {
-        $sql = "INSERT INTO urls (name, created_at) VALUES (:name, :created_at)";
-        $stmt = $this->get('pdo')->prepare($sql);
-        $stmt->bindValue(':name', $normalizedUrlName);
-        $stmt->bindValue(':created_at', Carbon::now());
-        $stmt->execute();
+        $sql2 = "INSERT INTO urls (name, created_at) VALUES (:name, :created_at)";
+        $stmt2 = $this->get('pdo')->prepare($sql2);
+        $stmt2->bindValue(':name', $normalizedUrlName);
+        $stmt2->bindValue(':created_at', Carbon::now());
+        $stmt2->execute();
         $urlId = $this->get('pdo')->lastInsertId();
         $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
     }
@@ -133,11 +130,11 @@ $app->post('/urls', function (Request $request, Response $response) {
 
 $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $response, array $args) {
     $urlId = (int) $args['id'];
-    $sql = "SELECT * FROM urls WHERE id=:url_id";
-    $stmt = $this->get('pdo')->prepare($sql);
-    $stmt->bindValue(':url_id', $urlId);
-    $stmt->execute();
-    $url = $stmt->fetch();
+    $sql1 = "SELECT * FROM urls WHERE id=:url_id";
+    $stmt1 = $this->get('pdo')->prepare($sql1);
+    $stmt1->bindValue(':url_id', $urlId);
+    $stmt1->execute();
+    $url = $stmt1->fetch();
 
     $client = new Client();
     try {
@@ -169,14 +166,14 @@ $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $respon
         ':created_at' => Carbon::now()
     ];
 
-    $sql = "INSERT INTO url_checks
+    $sql2 = "INSERT INTO url_checks
             (url_id, status_code, h1, title, description, created_at)
             VALUES (:url_id, :status_code, :h1, :title, :description, :created_at)";
-    $stmt = $this->get('pdo')->prepare($sql);
+    $stmt2 = $this->get('pdo')->prepare($sql2);
     foreach ($values as $name => $value) {
-        $stmt->bindValue($name, $value);
+        $stmt2->bindValue($name, $value);
     }
-    $stmt->execute();
+    $stmt2->execute();
 
     $flashMessage = 'Страница успешно проверена';
     $this->get('flash')->addMessage('success', $flashMessage);
