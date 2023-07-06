@@ -160,13 +160,12 @@ $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $respon
     $title = $document->first('title::text()');
     $description = $document->first('meta[name=description][content]::attr(content)');
 
-    $formatContent = fn ($text) => trim($text);
     $values = [
         ':url_id' => $urlId,
         ':status_code' => $statusCode,
-        ':h1' => optional($h1, $formatContent),
-        ':title' => optional($title, $formatContent),
-        ':description' => optional($description, $formatContent),
+        ':h1' => optional($h1, 'trim'),
+        ':title' => optional($title, 'trim'),
+        ':description' => optional($description, 'trim'),
         ':created_at' => Carbon::now()
     ];
 
