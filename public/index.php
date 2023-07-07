@@ -40,15 +40,15 @@ $app->get('/', function (Request $request, Response $response) {
 })->setName('root');
 
 $app->get('/urls', function (Request $request, Response $response) {
-    $sql1 = "SELECT * FROM urls ORDER BY id DESC;";
-    $stmt1 = $this->get('pdo')->prepare($sql1);
-    $stmt1->execute();
-    $urls = $stmt1->fetchAll();
+    $urlsQuery = "SELECT * FROM urls ORDER BY id DESC;";
+    $urlsStmt = $this->get('pdo')->prepare($urlsQuery);
+    $urlsStmt->execute();
+    $urls = $urlsStmt->fetchAll();
 
-    $sql2 = "SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id, created_at DESC;";
-    $stmt2 = $this->get('pdo')->prepare($sql2);
-    $stmt2->execute();
-    $urlChecks = $stmt2->fetchAll();
+    $checksQuery = "SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id, created_at DESC;";
+    $checksStmt = $this->get('pdo')->prepare($checksQuery);
+    $checksStmt->execute();
+    $urlChecks = $checksStmt->fetchAll();
     $urlChecksByUrlId = collect($urlChecks)->keyBy('url_id')->toArray();
 
     $params = [
@@ -62,14 +62,14 @@ $app->get('/urls', function (Request $request, Response $response) {
 $app->get('/urls/{id:\d+}', function (Request $request, Response $response, array $args) {
     $urlId = (int) $args['id'];
 
-    $sql1 = "SELECT * FROM urls WHERE id=:url_id";
-    $stmt1 = $this->get('pdo')->prepare($sql1);
-    $stmt1->bindValue(':url_id', $urlId);
-    $stmt1->execute();
-    $url = $stmt1->fetch();
+    $urlsQuery = "SELECT * FROM urls WHERE id=:url_id";
+    $urlsStmt = $this->get('pdo')->prepare($urlsQuery);
+    $urlsStmt->bindValue(':url_id', $urlId);
+    $urlsStmt->execute();
+    $url = $urlsStmt->fetch();
 
-    $sql2 = "SELECT * FROM url_checks WHERE url_id=:url_id ORDER BY id DESC";
-    $stmt2 = $this->get('pdo')->prepare($sql2);
+    $checksQuery = "SELECT * FROM url_checks WHERE url_id=:url_id ORDER BY id DESC";
+    $stmt2 = $this->get('pdo')->prepare($checksQuery);
     $stmt2->bindValue(':url_id', $urlId);
     $stmt2->execute();
     $urlChecks = $stmt2->fetchAll();
@@ -105,21 +105,21 @@ $app->post('/urls', function (Request $request, Response $response) {
             ->withStatus(422);
     }
 
-    $sql1 = "SELECT * FROM urls WHERE name=:name";
-    $stmt1 = $this->get('pdo')->prepare($sql1);
-    $stmt1->bindValue(':name', $normalizedUrlName);
-    $stmt1->execute();
-    $sameUrl = $stmt1->fetch();
+    $urlsQuery = "SELECT * FROM urls WHERE name=:name";
+    $urlsStmt = $this->get('pdo')->prepare($urlsQuery);
+    $urlsStmt->bindValue(':name', $normalizedUrlName);
+    $urlsStmt->execute();
+    $sameUrl = $urlsStmt->fetch();
 
     if (!empty($sameUrl)) {
         $this->get('flash')->addMessage('success', 'Страница уже существует');
         $urlId = $sameUrl['id'];
     } else {
-        $sql2 = "INSERT INTO urls (name, created_at) VALUES (:name, :created_at)";
-        $stmt2 = $this->get('pdo')->prepare($sql2);
-        $stmt2->bindValue(':name', $normalizedUrlName);
-        $stmt2->bindValue(':created_at', Carbon::now());
-        $stmt2->execute();
+        $insertUrlQuery = "INSERT INTO urls (name, created_at) VALUES (:name, :created_at)";
+        $insertUrlStmt = $this->get('pdo')->prepare($insertUrlQuery);
+        $insertUrlStmt->bindValue(':name', $normalizedUrlName);
+        $insertUrlStmt->bindValue(':created_at', Carbon::now());
+        $insertUrlStmt->execute();
         $urlId = $this->get('pdo')->lastInsertId();
         $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
     }
@@ -130,11 +130,11 @@ $app->post('/urls', function (Request $request, Response $response) {
 
 $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $response, array $args) {
     $urlId = (int) $args['id'];
-    $sql1 = "SELECT * FROM urls WHERE id=:url_id";
-    $stmt1 = $this->get('pdo')->prepare($sql1);
-    $stmt1->bindValue(':url_id', $urlId);
-    $stmt1->execute();
-    $url = $stmt1->fetch();
+    $urlsQuery = "SELECT * FROM urls WHERE id=:url_id";
+    $urlsStmt = $this->get('pdo')->prepare($urlsQuery);
+    $urlsStmt->bindValue(':url_id', $urlId);
+    $urlsStmt->execute();
+    $url = $urlsStmt->fetch();
 
     $client = new Client();
     try {
@@ -166,14 +166,14 @@ $app->post('/urls/{id:\d+}/checks', function (Request $request, Response $respon
         ':created_at' => Carbon::now()
     ];
 
-    $sql2 = "INSERT INTO url_checks
+    $insertCheckQuery = "INSERT INTO url_checks
             (url_id, status_code, h1, title, description, created_at)
             VALUES (:url_id, :status_code, :h1, :title, :description, :created_at)";
-    $stmt2 = $this->get('pdo')->prepare($sql2);
+    $insertCheckStmt = $this->get('pdo')->prepare($insertCheckQuery);
     foreach ($values as $name => $value) {
-        $stmt2->bindValue($name, $value);
+        $insertCheckStmt->bindValue($name, $value);
     }
-    $stmt2->execute();
+    $insertCheckStmt->execute();
 
     $flashMessage = 'Страница успешно проверена';
     $this->get('flash')->addMessage('success', $flashMessage);

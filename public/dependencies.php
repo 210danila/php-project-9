@@ -1,6 +1,6 @@
 <?php
 
-use App\{Connection};
+use App\Connection;
 use Slim\Views\PhpRenderer;
 use DI\Container;
 

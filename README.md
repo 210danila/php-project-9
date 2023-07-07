@@ -11,7 +11,7 @@ __Сайт на микрофреймворке слим.__
 2) Устанавливаем переменную окружения DATABASE_URL
 > export DATABASE_URL=postgresql://janedoe:mypassword@localhost:5432/mydb
 3) Выполняем миграции:
-> chmod +x app/Migrations
+> chmod +x bin/migrations
 > make migrate
 4) Запускаем приложение:
 > make start
